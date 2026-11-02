@@ -7,14 +7,14 @@ from typing import Annotated, Final, Literal
 
 from pydantic import Discriminator, Tag
 
-from ai_api.providers.anthropic.types.messages import (
+from aiollm.providers.anthropic.types.messages import (
     ContentBlock,
     Message,
     OutputTokensDetails,
     StopDetails,
 )
-from ai_api.types.base import BaseAPITypeExtra
-from ai_api.types.unknown import UNKNOWN, BaseUnknown, by_type
+from aiollm.types.base import BaseAPITypeExtra
+from aiollm.types.unknown import UNKNOWN, BaseUnknown, by_type
 
 
 class MessageStartEvent(BaseAPITypeExtra):

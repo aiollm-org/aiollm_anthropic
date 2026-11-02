@@ -8,19 +8,19 @@ from typing import Final
 
 from pydantic import BaseModel
 
-from ai_api.adapters.base import BaseConversion
-from ai_api.adapters.stop import Stop
-from ai_api.enums import IncompleteReason, Role
-from ai_api.http.exceptions.response import APIResponseError
-from ai_api.providers.anthropic.methods.base import MessageParam
-from ai_api.providers.anthropic.types.events import (
+from aiollm.adapters.base import BaseConversion
+from aiollm.adapters.stop import Stop
+from aiollm.enums import IncompleteReason, Role
+from aiollm.http.exceptions.response import APIResponseError
+from aiollm.providers.anthropic.methods.base import MessageParam
+from aiollm.providers.anthropic.types.events import (
     MessageDelta,
     MessageDeltaEvent,
     MessageStartEvent,
 )
-from ai_api.providers.anthropic.types.messages import Message, Usage
-from ai_api.types.requests.generation import Turn
-from ai_api.types.responses.generation import TokenUsage
+from aiollm.providers.anthropic.types.messages import Message, Usage
+from aiollm.types.requests.generation import Turn
+from aiollm.types.responses.generation import TokenUsage
 
 FINISHED: Final = frozenset({"end_turn", "stop_sequence"})
 """Stop reasons of a generation that reached its end.

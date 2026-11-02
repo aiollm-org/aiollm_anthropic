@@ -6,13 +6,13 @@ from collections.abc import Mapping
 from http import HTTPStatus
 from typing import Any, Final, cast
 
-from ai_api.http.exceptions.resolver import BaseErrorResolver
-from ai_api.http.exceptions.status import (
+from aiollm.http.exceptions.resolver import BaseErrorResolver
+from aiollm.http.exceptions.status import (
     APIStatusError,
     QuotaExceededError,
     ServiceUnavailableError,
 )
-from ai_api.providers.anthropic.api import PROVIDER
+from aiollm.providers.anthropic.api import PROVIDER
 
 OVERLOADED: Final = 529
 """Status of ``overloaded_error``: the API is temporarily overloaded."""

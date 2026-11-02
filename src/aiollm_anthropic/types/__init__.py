@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from ai_api.providers.anthropic.types.events import (
+from aiollm.providers.anthropic.types.events import (
     ContentBlockDeltaEvent,
     ContentBlockStartEvent,
     ContentBlockStopEvent,
@@ -18,7 +18,7 @@ from ai_api.providers.anthropic.types.events import (
     UnknownDelta,
     UnknownEvent,
 )
-from ai_api.providers.anthropic.types.messages import (
+from aiollm.providers.anthropic.types.messages import (
     ContentBlock,
     Message,
     OutputTokensDetails,

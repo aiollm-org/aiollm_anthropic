@@ -14,8 +14,8 @@ from pydantic import (
     with_config,
 )
 
-from ai_api.http.headers import ANTHROPIC_VERSION
-from ai_api.providers.anthropic.api import API_VERSION
+from aiollm.http.headers import ANTHROPIC_VERSION
+from aiollm.providers.anthropic.api import API_VERSION
 
 VERSION_HEADERS: Final[Mapping[str, str]] = {ANTHROPIC_VERSION: API_VERSION}
 """``__request_headers__`` of every Anthropic method.
