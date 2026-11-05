@@ -4,15 +4,15 @@ from __future__ import annotations
 
 from typing import Final, Literal
 
-from ai_api.enums import BodyFormat, ResponseFormat
-from ai_api.methods.base import BaseAPIMethod, BaseStreamMethod
-from ai_api.providers.anthropic.methods.base import (
+from aiollm.enums import BodyFormat, ResponseFormat
+from aiollm.methods.base import BaseAPIMethod, BaseStreamMethod
+from aiollm.providers.anthropic.methods.base import (
     VERSION_HEADERS,
     MessageParams,
 )
-from ai_api.providers.anthropic.types.events import MessageStreamEvent
-from ai_api.providers.anthropic.types.messages import Message
-from ai_api.types.matchers import EventTypes
+from aiollm.providers.anthropic.types.events import MessageStreamEvent
+from aiollm.providers.anthropic.types.messages import Message
+from aiollm.types.matchers import EventTypes
 
 TERMINAL_EVENTS: Final = EventTypes("message_stop")
 """The event that ends a complete Messages stream."""

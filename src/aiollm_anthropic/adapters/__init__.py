@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from ai_api.providers.anthropic.adapters.generation import (
+from aiollm.providers.anthropic.adapters.generation import (
     AnthropicGenerationAdapter,
 )
 

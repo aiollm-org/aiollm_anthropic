@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
-from ai_api.providers.anthropic.api import (
+from aiollm.providers.anthropic.api import (
     ANTHROPIC_API,
     API_VERSION,
     AnthropicAPI,
 )
-from ai_api.providers.anthropic.client import (
+from aiollm.providers.anthropic.client import (
     AnthropicClient,
 )
-from ai_api.providers.anthropic.resolver import (
+from aiollm.providers.anthropic.resolver import (
     AnthropicErrorResolver,
 )
 

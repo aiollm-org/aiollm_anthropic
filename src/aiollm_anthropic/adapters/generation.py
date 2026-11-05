@@ -7,21 +7,21 @@ from typing import TYPE_CHECKING, Any, Final
 
 from pydantic import MISSING
 
-from ai_api.adapters.base import BaseCompositeAdapter
-from ai_api.adapters.validation import check_last_turn, request_errors
-from ai_api.exceptions import RequestValidationError
-from ai_api.providers.anthropic.adapters.conversions import (
+from aiollm.adapters.base import BaseCompositeAdapter
+from aiollm.adapters.validation import check_last_turn, request_errors
+from aiollm.exceptions import RequestValidationError
+from aiollm.providers.anthropic.adapters.conversions import (
     INPUT_CONVERSION,
     STOP_CONVERSION,
     USAGE_CONVERSION,
     StreamState,
 )
-from ai_api.providers.anthropic.api import PROVIDER
-from ai_api.providers.anthropic.methods.messages import (
+from aiollm.providers.anthropic.api import PROVIDER
+from aiollm.providers.anthropic.methods.messages import (
     CreateMessage,
     StreamMessage,
 )
-from ai_api.providers.anthropic.types.events import (
+from aiollm.providers.anthropic.types.events import (
     ContentBlockDeltaEvent,
     MessageDeltaEvent,
     MessageStartEvent,
@@ -29,24 +29,24 @@ from ai_api.providers.anthropic.types.events import (
     MessageStreamEvent,
     TextDelta,
 )
-from ai_api.providers.anthropic.types.messages import Message
-from ai_api.types.requests.generation import GenerationRequest
-from ai_api.types.responses.events import (
+from aiollm.providers.anthropic.types.messages import Message
+from aiollm.types.requests.generation import GenerationRequest
+from aiollm.types.responses.events import (
     CompletedEvent,
     GenerationEvent,
     OtherEvent,
     TextDeltaEvent,
 )
-from ai_api.types.responses.generation import GenerationResponse
+from aiollm.types.responses.generation import GenerationResponse
 
 if TYPE_CHECKING:
-    from ai_api.adapters.protocols import IConversion
-    from ai_api.adapters.stop import Stop
-    from ai_api.providers.anthropic.methods.base import MessageParam
-    from ai_api.providers.anthropic.types.events import MessageDelta
-    from ai_api.providers.anthropic.types.messages import Usage
-    from ai_api.types.requests.generation import Turn
-    from ai_api.types.responses.generation import TokenUsage
+    from aiollm.adapters.protocols import IConversion
+    from aiollm.adapters.stop import Stop
+    from aiollm.providers.anthropic.methods.base import MessageParam
+    from aiollm.providers.anthropic.types.events import MessageDelta
+    from aiollm.providers.anthropic.types.messages import Usage
+    from aiollm.types.requests.generation import Turn
+    from aiollm.types.responses.generation import TokenUsage
 
 DEFAULT_MAX_TOKENS: Final = 1024
 """``max_tokens`` sent when the request has no ``max_output_tokens``."""

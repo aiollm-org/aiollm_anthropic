@@ -4,21 +4,22 @@ from __future__ import annotations
 
 from typing import Final, Unpack
 
-from ai_api.client.base import BaseProviderClient
-from ai_api.http.auth import BearerAuth
-from ai_api.http.headers import AUTHORIZATION, X_API_KEY
-from ai_api.providers.anthropic.adapters.generation import (
+from aiollm.client.base import BaseProviderClient
+from aiollm.client.binding import bind_resource
+from aiollm.http.auth import BearerAuth
+from aiollm.http.headers import AUTHORIZATION, X_API_KEY
+from aiollm.providers.anthropic.adapters.generation import (
     DEFAULT_MAX_TOKENS,
     AnthropicGenerationAdapter,
 )
-from ai_api.providers.anthropic.api import ANTHROPIC_API, PROVIDER
-from ai_api.providers.anthropic.resolver import AnthropicErrorResolver
-from ai_api.providers.anthropic.types.events import MessageStreamEvent
-from ai_api.providers.anthropic.types.messages import Message
-from ai_api.resources.generation import GenerationResource
-from ai_api.session.aiohttp import AiohttpSession, AiohttpSessionOptions
-from ai_api.session.factory import SessionFactory
-from ai_api.session.protocols import ISession
+from aiollm.providers.anthropic.api import ANTHROPIC_API, PROVIDER
+from aiollm.providers.anthropic.resolver import AnthropicErrorResolver
+from aiollm.providers.anthropic.types.events import MessageStreamEvent
+from aiollm.providers.anthropic.types.messages import Message
+from aiollm.resources.generation import GenerationResource
+from aiollm.session.aiohttp import AiohttpSession, AiohttpSessionOptions
+from aiollm.session.factory import SessionFactory
+from aiollm.session.protocols import ISession
 
 session_factory: Final = SessionFactory(
     AiohttpSession,
@@ -55,9 +56,22 @@ class AnthropicClient(BaseProviderClient):
     session_factory = session_factory
     api_key_env = ANTHROPIC_API_KEY_ENV
     auth_headers = frozenset({AUTHORIZATION, X_API_KEY})
-    adapter_types = (AnthropicGenerationAdapter,)
 
-    generation: GenerationResource[Message, MessageStreamEvent]
+    def _generation_adapter(self) -> AnthropicGenerationAdapter:
+        """Build the generation adapter with the client's options.
+
+        Returns:
+            The adapter, with ``default_max_tokens`` of ``__init__``.
+        """
+        return AnthropicGenerationAdapter(
+            default_max_tokens=self._default_max_tokens
+        )
+
+    generation = bind_resource(
+        GenerationResource[Message, MessageStreamEvent],
+        AnthropicGenerationAdapter,
+        adapter_factory=_generation_adapter,
+    )
 
     def __init__(
         self,
@@ -89,10 +103,8 @@ class AnthropicClient(BaseProviderClient):
                 ``session_kwargs`` are given with a ``session``, or
                 ``default_max_tokens`` is not positive.
         """
-        # Built first: a bad default_max_tokens fails before a session
-        # (and its connection pool) exists.
-        adapter = self.adapter(
-            AnthropicGenerationAdapter, default_max_tokens=default_max_tokens
-        )
+        # Read by _generation_adapter, which the base class calls before
+        # it builds the session: a bad default_max_tokens fails before a
+        # session (and its connection pool) exists.
+        self._default_max_tokens = default_max_tokens
         super().__init__(token, session=session, **session_kwargs)
-        self.generation = GenerationResource(self.session, adapter)
