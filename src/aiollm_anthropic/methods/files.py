@@ -50,8 +50,9 @@ class ListFiles(ListFilesParams, BaseAPIMethod[ListFilesResponse]):
 
     Pass the page's ``next_page`` as ``page`` while it is not ``None``.
     ``ids`` (up to 100) asks for those files only, in one page, and
-    cannot be combined with ``page`` or ``limit``; an id that names no
-    file is left out without an error.
+    cannot be combined with ``page`` or ``limit``. The id of a deleted
+    or unknown file is left out, while one that is not a valid file id
+    fails the whole request with ``BadRequestError``.
 
     Example:
         >>> page = await client.send_request(ListFiles(limit=100))
