@@ -1,0 +1,112 @@
+{
+ "anyOf": [
+  {
+   "$ref": "#/$defs/FileMetadata"
+  },
+  {
+   "$ref": "#/$defs/ListFilesResponse"
+  },
+  {
+   "$ref": "#/$defs/DeletedFile"
+  }
+ ],
+ "$defs": {
+  "DeletedFile": {
+   "type": "object",
+   "properties": {
+    "type": {
+     "type": "string",
+     "const": "file_deleted",
+     "default": "file_deleted",
+     "description": "Deleted object type. For file deletion, this is always `\"file_deleted\"`."
+    },
+    "id": {
+     "type": "string",
+     "description": "ID of the deleted file."
+    }
+   },
+   "required": [
+    "id"
+   ]
+  },
+  "FileMetadata": {
+   "type": "object",
+   "properties": {
+    "type": {
+     "type": "string",
+     "const": "file",
+     "description": "Object type. For files, this is always `\"file\"`."
+    },
+    "id": {
+     "type": "string",
+     "description": "Unique object identifier. The format and length of IDs may change over time."
+    },
+    "created_at": {
+     "type": "string",
+     "format": "date-time",
+     "description": "RFC 3339 datetime string representing when the file was created."
+    },
+    "filename": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 500,
+     "description": "Original filename of the uploaded file."
+    },
+    "mime_type": {
+     "type": "string",
+     "minLength": 1,
+     "maxLength": 255,
+     "description": "MIME type of the file."
+    },
+    "size_bytes": {
+     "type": "integer",
+     "minimum": 0,
+     "description": "Size of the file in bytes."
+    },
+    "downloadable": {
+     "type": "boolean",
+     "default": false,
+     "description": "Whether the file can be downloaded."
+    },
+    "expires_at": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "format": "date-time",
+     "description": "RFC 3339 datetime string representing when the file will expire and become unavailable for download. Null if the file does not expire. For files uploaded with `expires_in_seconds`, this is the upload time plus that value."
+    }
+   },
+   "required": [
+    "type",
+    "id",
+    "created_at",
+    "filename",
+    "mime_type",
+    "size_bytes"
+   ]
+  },
+  "ListFilesResponse": {
+   "type": "object",
+   "properties": {
+    "data": {
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/FileMetadata"
+     },
+     "description": "List of file metadata objects."
+    },
+    "next_page": {
+     "type": [
+      "string",
+      "null"
+     ],
+     "description": "Opaque cursor for the next page. Supply as `?page=` to fetch the next page; null when there are no more results."
+    }
+   },
+   "required": [
+    "data"
+   ]
+  }
+ }
+}

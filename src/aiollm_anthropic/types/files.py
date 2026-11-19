@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Annotated, Literal
 
-from pydantic import Field
+from pydantic import AwareDatetime, Field
 
 from aiollm.types.base import BaseAPITypeExtra
 
@@ -18,5 +18,140 @@ class ContainerUploadBlock(BaseAPITypeExtra):
     type: Annotated[Literal["container_upload"], Field(title="Type")]
 
 
+class DeletedFile(BaseAPITypeExtra):
+    """`DeletedFile` from the Anthropic Messages API.
+
+    Attributes:
+        type: Deleted object type. For file deletion, this is always
+            `"file_deleted"`.
+        id: ID of the deleted file.
+    """
+
+    __upstream_schema__ = "DeletedFile"
+    type: Annotated[
+        Literal["file_deleted"],
+        Field(
+            description=(
+                "Deleted object type. For file deletion, this "
+                'is always `"file_deleted"`.'
+            )
+        ),
+    ] = "file_deleted"
+    id: Annotated[str, Field(description="ID of the deleted file.")]
+
+
+class FileMetadata(BaseAPITypeExtra):
+    """`FileMetadata` from the Anthropic Messages API.
+
+    Attributes:
+        type: Object type. For files, this is always `"file"`.
+        id: Unique object identifier. The format and length of IDs
+            may change over time.
+        created_at: RFC 3339 datetime string representing when the
+            file was created.
+        filename: Original filename of the uploaded file.
+        mime_type: MIME type of the file.
+        size_bytes: Size of the file in bytes.
+        downloadable: Whether the file can be downloaded.
+        expires_at: RFC 3339 datetime string representing when the
+            file will expire and become unavailable for download.
+            Null if the file does not expire. For files uploaded with
+            `expires_in_seconds`, this is the upload time plus that
+            value.
+    """
+
+    __upstream_schema__ = "FileMetadata"
+    type: Annotated[
+        Literal["file"],
+        Field(
+            description=('Object type. For files, this is always `"file"`.')
+        ),
+    ]
+    id: Annotated[
+        str,
+        Field(
+            description=(
+                "Unique object identifier. The format and "
+                "length of IDs may change over time."
+            )
+        ),
+    ]
+    created_at: Annotated[
+        AwareDatetime,
+        Field(
+            description=(
+                "RFC 3339 datetime string representing when the"
+                " file was created."
+            )
+        ),
+    ]
+    filename: Annotated[
+        str,
+        Field(
+            description="Original filename of the uploaded file.",
+            max_length=500,
+            min_length=1,
+        ),
+    ]
+    mime_type: Annotated[
+        str,
+        Field(
+            description="MIME type of the file.", max_length=255, min_length=1
+        ),
+    ]
+    size_bytes: Annotated[
+        int, Field(description="Size of the file in bytes.", ge=0)
+    ]
+    downloadable: Annotated[
+        bool, Field(description="Whether the file can be downloaded.")
+    ] = False
+    expires_at: Annotated[
+        AwareDatetime | None,
+        Field(
+            description=(
+                "RFC 3339 datetime string representing when the"
+                " file will expire and become unavailable for "
+                "download. Null if the file does not expire. "
+                "For files uploaded with `expires_in_seconds`, "
+                "this is the upload time plus that value."
+            )
+        ),
+    ] = None
+
+
+class ListFilesResponse(BaseAPITypeExtra):
+    """`ListFilesResponse` from the Anthropic Messages API.
+
+    Attributes:
+        data: List of file metadata objects.
+        next_page: Opaque cursor for the next page. Supply as
+            `?page=` to fetch the next page; null when there are no
+            more results.
+    """
+
+    __upstream_schema__ = "ListFilesResponse"
+    data: Annotated[
+        list[FileMetadata], Field(description="List of file metadata objects.")
+    ]
+    next_page: Annotated[
+        str | None,
+        Field(
+            description=(
+                "Opaque cursor for the next page. Supply as "
+                "`?page=` to fetch the next page; null when "
+                "there are no more results."
+            )
+        ),
+    ] = None
+
+
 ContainerUploadBlock.model_rebuild()
-__all__ = ["ContainerUploadBlock"]
+DeletedFile.model_rebuild()
+FileMetadata.model_rebuild()
+ListFilesResponse.model_rebuild()
+__all__ = [
+    "ContainerUploadBlock",
+    "DeletedFile",
+    "FileMetadata",
+    "ListFilesResponse",
+]
