@@ -29,7 +29,12 @@ from .events import (
     TextDelta,
     ThinkingDelta,
 )
-from .files import ContainerUploadBlock
+from .files import (
+    ContainerUploadBlock,
+    DeletedFile,
+    FileMetadata,
+    ListFilesResponse,
+)
 from .messages import (
     CacheMissMessagesChanged,
     CacheMissModelChanged,
@@ -124,12 +129,15 @@ __all__ = [
     "Container",
     "ContainerSkill",
     "ContainerUploadBlock",
+    "DeletedFile",
     "Delta",
     "Diagnostics",
     "DirectCaller",
     "DocumentBlock",
     "EncryptedCodeExecutionResultBlock",
+    "FileMetadata",
     "InputJSONDelta",
+    "ListFilesResponse",
     "Message",
     "MessageDeltaUsage",
     "MessageStreamEvent",

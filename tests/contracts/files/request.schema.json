@@ -1,0 +1,95 @@
+{
+ "$defs": {
+  "CreateFileParams": {
+   "type": "object",
+   "properties": {
+    "file": {
+     "type": "string",
+     "format": "binary",
+     "description": "The file to upload. Only the final path component of the part's `filename` is kept; an absent or empty `filename` is replaced with `unnamed` plus the extension for the file's stored `mime_type`, when known."
+    },
+    "expires_in_seconds": {
+     "type": "integer",
+     "minimum": 3600,
+     "maximum": 7776000,
+     "description": "Seconds from upload until the file expires and its bytes become permanently unavailable. Must be between 3600 (one hour) and 7776000 (ninety days)."
+    }
+   },
+   "required": [
+    "file"
+   ]
+  },
+  "CreateFileRequest": {
+   "type": "object",
+   "properties": {
+    "file": {
+     "type": "string",
+     "format": "binary",
+     "description": "The file to upload. Only the final path component of the part's `filename` is kept; an absent or empty `filename` is replaced with `unnamed` plus the extension for the file's stored `mime_type`, when known."
+    },
+    "expires_in_seconds": {
+     "type": "integer",
+     "minimum": 3600,
+     "maximum": 7776000,
+     "description": "Seconds from upload until the file expires and its bytes become permanently unavailable. Must be between 3600 (one hour) and 7776000 (ninety days)."
+    }
+   },
+   "required": [
+    "file"
+   ]
+  },
+  "DeleteFileParams": {
+   "type": "object",
+   "properties": {
+    "file_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "file_id"
+   ]
+  },
+  "DownloadFileParams": {
+   "type": "object",
+   "properties": {
+    "file_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "file_id"
+   ]
+  },
+  "ListFilesParams": {
+   "type": "object",
+   "properties": {
+    "ids[]": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     },
+     "maxItems": 100
+    },
+    "limit": {
+     "type": "integer",
+     "minimum": 1,
+     "maximum": 1000
+    },
+    "page": {
+     "type": "string"
+    }
+   }
+  },
+  "RetrieveFileParams": {
+   "type": "object",
+   "properties": {
+    "file_id": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "file_id"
+   ]
+  }
+ }
+}

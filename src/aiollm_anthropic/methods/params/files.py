@@ -8,6 +8,7 @@ from typing import Annotated, Literal
 from pydantic import MISSING, ConfigDict, Field
 
 from aiollm.types.base import BaseAPIType
+from aiollm.types.files import InputFile as _AiollmInputFile
 
 
 class BrowserFileUploadConfigParam(BaseAPIType):
@@ -32,6 +33,108 @@ class ContainerUploadBlock(BaseAPIType):
     )
 
 
+class CreateFileParams(BaseAPIType):
+    """`CreateFileParams` from the Anthropic Messages API.
+
+    Attributes:
+        file: The file to upload. Only the final path component of
+            the part's `filename` is kept; an absent or empty
+            `filename` is replaced with `unnamed` plus the extension
+            for the file's stored `mime_type`, when known.
+        expires_in_seconds: Seconds from upload until the file
+            expires and its bytes become permanently unavailable.
+            Must be between 3600 (one hour) and 7776000 (ninety
+            days).
+    """
+
+    __upstream_schema__ = "CreateFileParams"
+    model_config = ConfigDict(extra="forbid")
+    file: Annotated[
+        _AiollmInputFile,
+        Field(
+            description=(
+                "The file to upload. Only the final path "
+                "component of the part's `filename` is kept; an"
+                " absent or empty `filename` is replaced with "
+                "`unnamed` plus the extension for the file's "
+                "stored `mime_type`, when known."
+            )
+        ),
+    ]
+    expires_in_seconds: Annotated[
+        int | MISSING,
+        Field(
+            description=(
+                "Seconds from upload until the file expires and"
+                " its bytes become permanently unavailable. "
+                "Must be between 3600 (one hour) and 7776000 "
+                "(ninety days)."
+            ),
+            ge=3600,
+            le=7776000,
+        ),
+    ] = MISSING
+
+
+class CreateFileRequest(BaseAPIType):
+    """`CreateFileRequest` from the Anthropic Messages API.
+
+    Attributes:
+        file: The file to upload. Only the final path component of
+            the part's `filename` is kept; an absent or empty
+            `filename` is replaced with `unnamed` plus the extension
+            for the file's stored `mime_type`, when known.
+        expires_in_seconds: Seconds from upload until the file
+            expires and its bytes become permanently unavailable.
+            Must be between 3600 (one hour) and 7776000 (ninety
+            days).
+    """
+
+    __upstream_schema__ = "CreateFileRequest"
+    model_config = ConfigDict(extra="forbid")
+    file: Annotated[
+        _AiollmInputFile,
+        Field(
+            description=(
+                "The file to upload. Only the final path "
+                "component of the part's `filename` is kept; an"
+                " absent or empty `filename` is replaced with "
+                "`unnamed` plus the extension for the file's "
+                "stored `mime_type`, when known."
+            )
+        ),
+    ]
+    expires_in_seconds: Annotated[
+        int | MISSING,
+        Field(
+            description=(
+                "Seconds from upload until the file expires and"
+                " its bytes become permanently unavailable. "
+                "Must be between 3600 (one hour) and 7776000 "
+                "(ninety days)."
+            ),
+            ge=3600,
+            le=7776000,
+        ),
+    ] = MISSING
+
+
+class DeleteFileParams(BaseAPIType):
+    """`DeleteFileParams` from the Anthropic Messages API."""
+
+    __upstream_schema__ = "DeleteFileParams"
+    model_config = ConfigDict(extra="forbid")
+    file_id: str
+
+
+class DownloadFileParams(BaseAPIType):
+    """`DownloadFileParams` from the Anthropic Messages API."""
+
+    __upstream_schema__ = "DownloadFileParams"
+    model_config = ConfigDict(extra="forbid")
+    file_id: str
+
+
 class FileDocumentSourceParam(BaseAPIType):
     """`FileDocumentSourceParam` from the Anthropic Messages API."""
 
@@ -50,13 +153,50 @@ class FileImageSourceParam(BaseAPIType):
     type: Annotated[Literal["file"], Field(title="Type")] = "file"
 
 
+class ListFilesParams(BaseAPIType):
+    """`ListFilesParams` from the Anthropic Messages API."""
+
+    __upstream_schema__ = "ListFilesParams"
+    model_config = ConfigDict(extra="forbid")
+    ids: Annotated[
+        list[str] | MISSING,
+        Field(
+            validation_alias="ids[]",
+            max_length=100,
+            serialization_alias="ids[]",
+        ),
+    ] = MISSING
+    limit: Annotated[int | MISSING, Field(ge=1, le=1000)] = MISSING
+    page: str | MISSING = MISSING
+
+
+class RetrieveFileParams(BaseAPIType):
+    """`RetrieveFileParams` from the Anthropic Messages API."""
+
+    __upstream_schema__ = "RetrieveFileParams"
+    model_config = ConfigDict(extra="forbid")
+    file_id: str
+
+
 BrowserFileUploadConfigParam.model_rebuild()
 ContainerUploadBlock.model_rebuild()
+CreateFileParams.model_rebuild()
+CreateFileRequest.model_rebuild()
+DeleteFileParams.model_rebuild()
+DownloadFileParams.model_rebuild()
 FileDocumentSourceParam.model_rebuild()
 FileImageSourceParam.model_rebuild()
+ListFilesParams.model_rebuild()
+RetrieveFileParams.model_rebuild()
 __all__ = [
     "BrowserFileUploadConfigParam",
     "ContainerUploadBlock",
+    "CreateFileParams",
+    "CreateFileRequest",
+    "DeleteFileParams",
+    "DownloadFileParams",
     "FileDocumentSourceParam",
     "FileImageSourceParam",
+    "ListFilesParams",
+    "RetrieveFileParams",
 ]

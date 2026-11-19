@@ -1,0 +1,353 @@
+{
+ "openapi": "3.1.0",
+ "info": {
+  "title": "Anthropic Files API",
+  "version": "2026-10-21",
+  "description": "Transcribed by hand from Anthropic's API reference, which publishes no OpenAPI file; the docs-lite dump has no request or list schemas for these endpoints. The reference writes integers as \"number\"; the SDKs type them as integers.",
+  "x-retrieved": "2026-11-19",
+  "x-sources": [
+   "https://platform.claude.com/docs/en/api/files/upload",
+   "https://platform.claude.com/docs/en/api/files/list",
+   "https://platform.claude.com/docs/en/api/files/retrieve_metadata",
+   "https://platform.claude.com/docs/en/api/files/download",
+   "https://platform.claude.com/docs/en/api/files/delete",
+   "https://platform.claude.com/docs/en/build-with-claude/files"
+  ]
+ },
+ "servers": [
+  {
+   "url": "https://api.anthropic.com/v1"
+  }
+ ],
+ "paths": {
+  "/files": {
+   "post": {
+    "operationId": "createFile",
+    "tags": [
+     "Files"
+    ],
+    "summary": "Upload a file.",
+    "requestBody": {
+     "required": true,
+     "content": {
+      "multipart/form-data": {
+       "schema": {
+        "$ref": "#/components/schemas/CreateFileRequest"
+       }
+      }
+     }
+    },
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/FileMetadata"
+        },
+        "example": {
+         "id": "file_011CNha8iCJcU1wXNR6q4V8w",
+         "created_at": "2025-04-15T18:37:24.100435Z",
+         "filename": "document.pdf",
+         "mime_type": "application/pdf",
+         "size_bytes": 102400,
+         "type": "file",
+         "downloadable": false,
+         "expires_at": "2025-05-15T18:37:24.100435Z"
+        }
+       }
+      }
+     }
+    }
+   },
+   "get": {
+    "operationId": "listFiles",
+    "tags": [
+     "Files"
+    ],
+    "summary": "List files, newest first.",
+    "parameters": [
+     {
+      "name": "ids[]",
+      "in": "query",
+      "required": false,
+      "description": "Restrict the result set to Files whose `id` is in this list. At most 100 entries (after de-duplication). Mutually exclusive with `page` and `limit`. When supplied, the response is always a single page (`next_page` is null). IDs that do not resolve to a visible File, including deleted Files, are silently omitted.",
+      "schema": {
+       "type": "array",
+       "items": {
+        "type": "string"
+       },
+       "maxItems": 100
+      }
+     },
+     {
+      "name": "limit",
+      "in": "query",
+      "required": false,
+      "description": "Number of items to return per page. Defaults to `20`. Ranges from `1` to `1000`.",
+      "schema": {
+       "type": "integer",
+       "minimum": 1,
+       "maximum": 1000
+      }
+     },
+     {
+      "name": "page",
+      "in": "query",
+      "required": false,
+      "description": "Opaque page cursor returned in a prior list response's `next_page`. Prefixed `page_`.",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/ListFilesResponse"
+        },
+        "example": {
+         "data": [
+          {
+           "id": "file_011CNha8iCJcU1wXNR6q4V8w",
+           "created_at": "2025-04-15T18:37:24.100435Z",
+           "filename": "document.pdf",
+           "mime_type": "application/pdf",
+           "size_bytes": 102400,
+           "type": "file",
+           "downloadable": false,
+           "expires_at": "2025-05-15T18:37:24.100435Z"
+          }
+         ],
+         "next_page": "next_page"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/files/{file_id}": {
+   "get": {
+    "operationId": "retrieveFile",
+    "tags": [
+     "Files"
+    ],
+    "summary": "Get the metadata of a file.",
+    "parameters": [
+     {
+      "name": "file_id",
+      "in": "path",
+      "required": true,
+      "description": "ID of the File.",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/FileMetadata"
+        }
+       }
+      }
+     }
+    }
+   },
+   "delete": {
+    "operationId": "deleteFile",
+    "tags": [
+     "Files"
+    ],
+    "summary": "Delete a file.",
+    "parameters": [
+     {
+      "name": "file_id",
+      "in": "path",
+      "required": true,
+      "description": "ID of the File.",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/json": {
+        "schema": {
+         "$ref": "#/components/schemas/DeletedFile"
+        },
+        "example": {
+         "id": "file_011CNha8iCJcU1wXNR6q4V8w",
+         "type": "file_deleted"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "/files/{file_id}/content": {
+   "get": {
+    "operationId": "downloadFile",
+    "tags": [
+     "Files"
+    ],
+    "summary": "Download the content of a file that a tool created.",
+    "parameters": [
+     {
+      "name": "file_id",
+      "in": "path",
+      "required": true,
+      "description": "ID of the File.",
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "description": "OK",
+      "content": {
+       "application/octet-stream": {
+        "schema": {
+         "type": "string",
+         "format": "binary"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "components": {
+  "schemas": {
+   "CreateFileRequest": {
+    "type": "object",
+    "properties": {
+     "file": {
+      "type": "string",
+      "format": "binary",
+      "description": "The file to upload. Only the final path component of the part's `filename` is kept; an absent or empty `filename` is replaced with `unnamed` plus the extension for the file's stored `mime_type`, when known."
+     },
+     "expires_in_seconds": {
+      "type": "integer",
+      "minimum": 3600,
+      "maximum": 7776000,
+      "description": "Seconds from upload until the file expires and its bytes become permanently unavailable. Must be between 3600 (one hour) and 7776000 (ninety days)."
+     }
+    },
+    "required": [
+     "file"
+    ]
+   },
+   "FileMetadata": {
+    "type": "object",
+    "properties": {
+     "type": {
+      "type": "string",
+      "const": "file",
+      "description": "Object type. For files, this is always `\"file\"`."
+     },
+     "id": {
+      "type": "string",
+      "description": "Unique object identifier. The format and length of IDs may change over time."
+     },
+     "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "RFC 3339 datetime string representing when the file was created."
+     },
+     "filename": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500,
+      "description": "Original filename of the uploaded file."
+     },
+     "mime_type": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "description": "MIME type of the file."
+     },
+     "size_bytes": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Size of the file in bytes."
+     },
+     "downloadable": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the file can be downloaded."
+     },
+     "expires_at": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "format": "date-time",
+      "description": "RFC 3339 datetime string representing when the file will expire and become unavailable for download. Null if the file does not expire. For files uploaded with `expires_in_seconds`, this is the upload time plus that value."
+     }
+    },
+    "required": [
+     "type",
+     "id",
+     "created_at",
+     "filename",
+     "mime_type",
+     "size_bytes"
+    ]
+   },
+   "ListFilesResponse": {
+    "type": "object",
+    "properties": {
+     "data": {
+      "type": "array",
+      "items": {
+       "$ref": "#/components/schemas/FileMetadata"
+      },
+      "description": "List of file metadata objects."
+     },
+     "next_page": {
+      "type": [
+       "string",
+       "null"
+      ],
+      "description": "Opaque cursor for the next page. Supply as `?page=` to fetch the next page; null when there are no more results."
+     }
+    },
+    "required": [
+     "data"
+    ]
+   },
+   "DeletedFile": {
+    "type": "object",
+    "properties": {
+     "type": {
+      "type": "string",
+      "const": "file_deleted",
+      "default": "file_deleted",
+      "description": "Deleted object type. For file deletion, this is always `\"file_deleted\"`."
+     },
+     "id": {
+      "type": "string",
+      "description": "ID of the deleted file."
+     }
+    },
+    "required": [
+     "id"
+    ]
+   }
+  }
+ }
+}
