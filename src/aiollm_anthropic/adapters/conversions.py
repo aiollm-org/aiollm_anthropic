@@ -29,6 +29,7 @@ from aiollm.types.requests.content import (
     ContentPart,
     DocumentPart,
     ImagePart,
+    ProviderFile,
 )
 from aiollm.types.requests.generation import (
     InputItem,
@@ -149,9 +150,10 @@ def _block(part: ContentPart) -> dict[str, Any]:
     """Convert a part of a turn into a content block.
 
     Text becomes a ``text`` block, an image an ``image`` block and a
-    document a ``document`` block, with a ``base64`` source for bytes
-    and a ``url`` source for a URL, and a document's ``filename`` as its
-    ``title``.
+    document a ``document`` block, with a ``base64`` source for bytes,
+    a ``url`` source for a URL and a ``file`` source for a stored file,
+    and a document's ``filename`` as its ``title``. The adapter has
+    checked that a file is Anthropic's.
 
     Args:
         part: The part.
@@ -167,6 +169,8 @@ def _block(part: ContentPart) -> dict[str, Any]:
                     "media_type": part.media_type,
                     "data": base64.b64encode(part.data).decode(),
                 }
+            elif isinstance(part.file, ProviderFile):
+                source = {"type": "file", "file_id": part.file.id}
             else:
                 source = {"type": "url", "url": part.url}
             block: dict[str, Any] = {"type": part.type, "source": source}
