@@ -8,6 +8,7 @@ from aiollm.client.base import BaseProviderClient
 from aiollm.client.binding import bind_resource
 from aiollm.http.auth import BearerAuth
 from aiollm.http.headers import AUTHORIZATION, X_API_KEY
+from aiollm.providers.anthropic.adapters.files import AnthropicFilesAdapter
 from aiollm.providers.anthropic.adapters.generation import (
     DEFAULT_MAX_TOKENS,
     AnthropicGenerationAdapter,
@@ -15,8 +16,13 @@ from aiollm.providers.anthropic.adapters.generation import (
 from aiollm.providers.anthropic.api import ANTHROPIC_API, PROVIDER
 from aiollm.providers.anthropic.resolver import AnthropicErrorResolver
 from aiollm.providers.anthropic.types.events import MessageStreamEvent
+from aiollm.providers.anthropic.types.files import (
+    FileMetadata,
+    ListFilesResponse,
+)
 from aiollm.providers.anthropic.types.messages import Message
 from aiollm.providers.anthropic.types.options import AnthropicGenerationOptions
+from aiollm.resources.files import FilesResource
 from aiollm.resources.generation import GenerationResource
 from aiollm.session.aiohttp import AiohttpSession, AiohttpSessionOptions
 from aiollm.session.factory import SessionFactory
@@ -45,6 +51,7 @@ class AnthropicClient(BaseProviderClient):
         generation: Shared text generation over the Messages API, with
             ``max_tokens`` of ``default_max_tokens`` for a request
             without ``max_output_tokens``.
+        files: Shared file storage over the Files API.
 
     Example:
         >>> async with AnthropicClient("sk-ant-...") as client:
@@ -74,6 +81,11 @@ class AnthropicClient(BaseProviderClient):
         ],
         AnthropicGenerationAdapter,
         adapter_factory=_generation_adapter,
+    )
+
+    files = bind_resource(
+        FilesResource[FileMetadata, ListFilesResponse],
+        AnthropicFilesAdapter,
     )
 
     def __init__(

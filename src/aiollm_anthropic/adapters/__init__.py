@@ -7,11 +7,15 @@ from aiollm.providers.anthropic.adapters.conversions import (
     message_thinking,
     message_tool_calls,
 )
+from aiollm.providers.anthropic.adapters.files import (
+    AnthropicFilesAdapter,
+)
 from aiollm.providers.anthropic.adapters.generation import (
     AnthropicGenerationAdapter,
 )
 
 __all__ = [
+    "AnthropicFilesAdapter",
     "AnthropicGenerationAdapter",
     "message_text",
     "message_thinking",

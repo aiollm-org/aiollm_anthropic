@@ -11,6 +11,7 @@ from pydantic import MISSING
 from aiollm.adapters.base import BaseCompositeAdapter
 from aiollm.adapters.validation import (
     check_conversation,
+    check_files,
     checked_options,
     merge_options,
     request_errors,
@@ -324,11 +325,13 @@ class AnthropicGenerationAdapter(
 
         Raises:
             RequestValidationError: The conversation is out of order (see
-                ``check_conversation``), or a call of a turn without
-                Anthropic's own content has arguments that are not a JSON
-                object, which ``tool_use.input`` must be.
+                ``check_conversation``), a part names another provider's
+                file, or a call of a turn without Anthropic's own content
+                has arguments that are not a JSON object, which
+                ``tool_use.input`` must be.
         """
         check_conversation(request, self.provider)
+        check_files(request, self.provider)
         _check_arguments(request)
         fields = {
             "model": request.model,
