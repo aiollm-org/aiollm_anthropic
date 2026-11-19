@@ -160,11 +160,7 @@ class ListFilesParams(BaseAPIType):
     model_config = ConfigDict(extra="forbid")
     ids: Annotated[
         list[str] | MISSING,
-        Field(
-            validation_alias="ids[]",
-            max_length=100,
-            serialization_alias="ids[]",
-        ),
+        Field(validation_alias="ids[]", serialization_alias="ids[]"),
     ] = MISSING
     limit: Annotated[int | MISSING, Field(ge=1, le=1000)] = MISSING
     page: str | MISSING = MISSING

@@ -67,8 +67,7 @@
      "type": "array",
      "items": {
       "type": "string"
-     },
-     "maxItems": 100
+     }
     },
     "limit": {
      "type": "integer",
