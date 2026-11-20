@@ -28,6 +28,8 @@ from aiollm.providers.anthropic.types.options import (
     AnthropicGenerationOptions,
 )
 from aiollm.resources.generation import GenerationResource
+from aiollm.testing import TEST_TOKEN, LocalAPI, Reply
+from aiollm.testing.aiohttp import Recorder
 from aiollm.types.requests import (
     GenerationRequest,
     ToolCall,
@@ -42,7 +44,6 @@ from aiollm.types.responses import (
     TextDeltaEvent,
     TokenUsage,
 )
-from tests.conftest import TEST_TOKEN, LocalAPI, Recorder, Reply
 from tests.providers.test_anthropic_messages import (
     MESSAGE,
     MODEL,

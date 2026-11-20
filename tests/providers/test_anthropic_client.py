@@ -29,13 +29,8 @@ from aiollm.providers.anthropic import (
 )
 from aiollm.providers.anthropic.api import PROVIDER as ANTHROPIC_PROVIDER
 from aiollm.providers.anthropic.client import session_factory
-from tests.conftest import (
-    TEST_TOKEN,
-    LocalAPI,
-    Recorder,
-    Reply,
-    make_method,
-)
+from aiollm.testing import TEST_TOKEN, LocalAPI, Reply, make_method
+from aiollm.testing.aiohttp import Recorder
 
 SPEND_CAP_MESSAGE = (
     "You have reached your API usage limits: your organization has "

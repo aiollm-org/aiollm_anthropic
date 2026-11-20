@@ -39,12 +39,8 @@ from aiollm.providers.anthropic.types import (
 )
 from aiollm.providers.anthropic.types.shared import UnknownVariant
 from aiollm.session.aiohttp import AiohttpSession
-from tests.conftest import (
-    FakeStreamResponse,
-    FakeTransport,
-    Recorder,
-    Reply,
-)
+from aiollm.testing import FakeStreamResponse, FakeTransport, Reply
+from aiollm.testing.aiohttp import Recorder
 
 MODEL = "claude-opus-5-5"
 
