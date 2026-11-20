@@ -1,9 +1,9 @@
 """Follow Anthropic's pinned schema sources and refresh what they make.
 
-Run from the aiollm checkout (``.github/workflows/upstream.yml`` runs it
+Run from the aiollm_anthropic checkout (``.github/workflows/upstream.yml`` runs it
 every week):
 
-    uv run python scripts/anthropic/refresh_upstream.py --out DIR
+    uv run python scripts/refresh_upstream.py --out DIR
 
 It compares each pin with its source:
 
@@ -11,14 +11,14 @@ It compares each pin with its source:
   the ``upstream`` dependency group;
 - the Files API: the Markdown of the API reference pages its
   transcription follows, against the hashes in
-  ``tests/providers/anthropic/contracts/sources/anthropic-files.pages.json``.
+  ``tests/contracts/sources/anthropic-files.pages.json``.
 
 A pin that is behind is moved (the pin, ``uv.lock`` and
 ``ANTHROPIC_VERSION`` from the new SDK), then the contract snapshot is
 rebuilt and the types regenerated, so the working tree holds the whole
 change for a pull request; ``DIR/pull-request.md`` describes it, with
 the public names the new types add or remove against
-``tests/providers/anthropic/public_api.json``, which a person updates. A
+``tests/public_api.json``, which a person updates. A
 changed page is not followed automatically, since the transcription is
 written by hand: it is listed in ``DIR/issue.md`` for someone to compare
 with the transcription, who then runs this script with
@@ -41,10 +41,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Final
 
-ROOT: Final = Path(__file__).resolve().parents[2]
-SCRIPT: Final = ROOT / "scripts" / "anthropic" / "generate_types.py"
+ROOT: Final = Path(__file__).resolve().parents[1]
+SCRIPT: Final = ROOT / "scripts" / "generate_types.py"
 PYPROJECT: Final = ROOT / "pyproject.toml"
-TESTS: Final = ROOT / "tests" / "providers" / "anthropic"
+TESTS: Final = ROOT / "tests"
 SOURCES: Final = TESTS / "contracts" / "sources"
 FILES_SPEC: Final = SOURCES / "anthropic-files.openapi.json"
 PAGES: Final = SOURCES / "anthropic-files.pages.json"
@@ -233,7 +233,7 @@ def names_section(names: list[Names]) -> str:
         return "No public name is added or removed.\n"
     lines = [
         "The public names differ from",
-        "`tests/providers/anthropic/public_api.json`, so",
+        "`tests/public_api.json`, so",
         "`test_the_public_api_matches_its_snapshot` fails until it is",
         "updated; a removed or renamed name is a breaking change:",
         "",
@@ -303,13 +303,13 @@ def table(changes: list[Change]) -> str:
 PULL_REQUEST: Final = """\
 The weekly check found a new release of Anthropic's SDK. This pull
 request moves the pin, rebuilds the contract snapshot
-(`tests/providers/anthropic/contracts/`) and regenerates Anthropic's
+(`tests/contracts/`) and regenerates Anthropic's
 types.
 
 {table}
 {names}
 Before merging, read the diff of the snapshot and of
-`src/aiollm/providers/anthropic`:
+`src/aiollm_anthropic`:
 
 - a field, type or event that was removed or narrowed is a breaking
   change: add a `**Breaking:**` fragment to `CHANGES/`;
@@ -318,15 +318,15 @@ Before merging, read the diff of the snapshot and of
   until it is fixed or removed by hand.
 
 Opened by `.github/workflows/upstream.yml`
-(`scripts/anthropic/refresh_upstream.py`).
+(`scripts/refresh_upstream.py`).
 """
 
 ISSUE: Final = """\
 The weekly check found changes in the API reference pages that
-`tests/providers/anthropic/contracts/sources/anthropic-files.openapi.json`
+`tests/contracts/sources/anthropic-files.openapi.json`
 transcribes. Compare each page with the transcription, update it where
 the API changed, then run
-`uv run python scripts/anthropic/refresh_upstream.py --update-pages` and
+`uv run python scripts/refresh_upstream.py --update-pages` and
 commit
 the new hashes.
 
@@ -392,7 +392,7 @@ def main() -> None:
             "upstream",
             "python",
             "-m",
-            "tests.providers.anthropic.contracts.update",
+            "tests.contracts.update",
         )
         run("uv", "run", "python", str(SCRIPT))
         body = PULL_REQUEST.format(

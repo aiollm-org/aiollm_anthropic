@@ -10,15 +10,16 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from aiollm.providers.anthropic import AnthropicClient
-from aiollm.providers.anthropic.api import PROVIDER as ANTHROPIC_PROVIDER
-from aiollm.providers.anthropic.client import (
+from aiollm.testing.contract.files import FilesCase, FilesContract
+
+from aiollm_anthropic import AnthropicClient
+from aiollm_anthropic.api import PROVIDER as ANTHROPIC_PROVIDER
+from aiollm_anthropic.client import (
     session_factory as anthropic_factory,
 )
-from aiollm.providers.anthropic.types import FileMetadata
-from aiollm.testing.contract.files import FilesCase, FilesContract
-from tests.providers.anthropic import test_messages as anthropic
-from tests.providers.anthropic.test_files import documented
+from aiollm_anthropic.types import FileMetadata
+from tests import test_messages as anthropic
+from tests.test_files import documented
 
 ANTHROPIC_FILE = documented("createFile")
 

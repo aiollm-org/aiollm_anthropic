@@ -37,13 +37,6 @@ from pydantic_core import to_jsonable_python
 from aiollm.adapters import ICompositeAdapter
 from aiollm.enums import Effort, ToolChoice
 from aiollm.methods import BaseAPIMethod, BaseStreamMethod
-from aiollm.providers.anthropic.adapters import AnthropicGenerationAdapter
-from aiollm.providers.anthropic.adapters.conversions import message_text
-from aiollm.providers.anthropic.methods import CreateMessage, StreamMessage
-from aiollm.providers.anthropic.types import Message, MessageStreamEvent
-from aiollm.providers.anthropic.types.options import (
-    AnthropicGenerationOptions,
-)
 from aiollm.response.parse.stream import StreamResponseParser
 from aiollm.session.aiohttp import AiohttpSession
 from aiollm.testing import Reply
@@ -68,8 +61,16 @@ from aiollm.types.requests import (
     ToolResult,
     Turn,
 )
-from tests.providers.anthropic import test_messages as anthropic
-from tests.providers.anthropic.contracts.update import (
+
+from aiollm_anthropic.adapters import AnthropicGenerationAdapter
+from aiollm_anthropic.adapters.conversions import message_text
+from aiollm_anthropic.methods import CreateMessage, StreamMessage
+from aiollm_anthropic.types import Message, MessageStreamEvent
+from aiollm_anthropic.types.options import (
+    AnthropicGenerationOptions,
+)
+from tests import test_messages as anthropic
+from tests.contracts.update import (
     event_tags,
     type_tags,
 )
@@ -134,7 +135,7 @@ def modules(
     """Import every module of a package.
 
     Args:
-        package: The package, such as ``aiollm.providers.openai.types``.
+        package: The package, such as ``aiollm_anthropic.types``.
         skip: Module names left out, such as the hand-written options.
 
     Returns:
@@ -229,10 +230,8 @@ ANTHROPIC = Case(
     examples=([anthropic.MESSAGE], anthropic.STREAM),
     adapter=AnthropicGenerationAdapter(),
     options=AnthropicGenerationOptions,
-    models=modules(
-        "aiollm.providers.anthropic.types", skip=frozenset({"options"})
-    ),
-    params=modules("aiollm.providers.anthropic.methods.params"),
+    models=modules("aiollm_anthropic.types", skip=frozenset({"options"})),
+    params=modules("aiollm_anthropic.methods.params"),
 )
 
 CASES = [pytest.param(case, id=case.name) for case in (ANTHROPIC,)]

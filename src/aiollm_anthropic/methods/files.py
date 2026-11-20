@@ -4,15 +4,16 @@ from __future__ import annotations
 
 from aiollm.enums import BodyFormat, ResponseFormat
 from aiollm.methods.base import BaseAPIMethod, BaseStreamMethod
-from aiollm.providers.anthropic.methods.messages import VERSION_HEADERS
-from aiollm.providers.anthropic.methods.params.files import (
+
+from aiollm_anthropic.methods.messages import VERSION_HEADERS
+from aiollm_anthropic.methods.params.files import (
     CreateFileParams,
     DeleteFileParams,
     DownloadFileParams,
     ListFilesParams,
     RetrieveFileParams,
 )
-from aiollm.providers.anthropic.types.files import (
+from aiollm_anthropic.types.files import (
     DeletedFile,
     FileMetadata,
     ListFilesResponse,

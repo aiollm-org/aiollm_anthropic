@@ -15,12 +15,12 @@ PACKAGES = list(json.loads(SNAPSHOT.read_text(encoding="utf-8")))
 
 
 def test_every_package_is_listed() -> None:
-    root = importlib.import_module("aiollm.providers.anthropic")
+    root = importlib.import_module("aiollm_anthropic")
     folder = Path(root.__file__ or "").parent
     found = {
         ".".join(
             [
-                "aiollm.providers.anthropic",
+                "aiollm_anthropic",
                 *init.parent.relative_to(folder).parts,
             ]
         )

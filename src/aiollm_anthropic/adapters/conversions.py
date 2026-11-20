@@ -14,17 +14,6 @@ from aiollm.adapters.base import BaseConversion
 from aiollm.adapters.stop import Stop
 from aiollm.enums import IncompleteReason, Role
 from aiollm.http.exceptions.response import APIResponseError
-from aiollm.providers.anthropic.api import PROVIDER
-from aiollm.providers.anthropic.types import (
-    Delta,
-    Message,
-    RawMessageDeltaEvent,
-    RawMessageStartEvent,
-    TextBlock,
-    ThinkingBlock,
-    ToolUseBlock,
-    Usage,
-)
 from aiollm.types.requests.content import (
     ContentPart,
     DocumentPart,
@@ -34,11 +23,24 @@ from aiollm.types.requests.content import (
 from aiollm.types.requests.generation import (
     InputItem,
     NativeOutput,
+    ToolCall,
     ToolCallTurn,
     ToolResult,
     Turn,
 )
-from aiollm.types.responses.generation import TokenUsage, ToolCall
+from aiollm.types.responses.generation import TokenUsage
+
+from aiollm_anthropic.api import PROVIDER
+from aiollm_anthropic.types import (
+    Delta,
+    Message,
+    RawMessageDeltaEvent,
+    RawMessageStartEvent,
+    TextBlock,
+    ThinkingBlock,
+    ToolUseBlock,
+    Usage,
+)
 
 FINISHED: Final = frozenset({"end_turn", "stop_sequence", "tool_use"})
 """Stop reasons of a generation that reached its end.

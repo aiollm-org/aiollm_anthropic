@@ -5,14 +5,14 @@ Their request fields are the generated mixins of ``methods.params``.
 
 from __future__ import annotations
 
-from aiollm.providers.anthropic.methods.files import (
+from aiollm_anthropic.methods.files import (
     CreateFile,
     DeleteFile,
     DownloadFile,
     ListFiles,
     RetrieveFile,
 )
-from aiollm.providers.anthropic.methods.messages import (
+from aiollm_anthropic.methods.messages import (
     VERSION_HEADERS,
     CreateMessage,
     StreamMessage,

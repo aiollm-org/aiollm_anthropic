@@ -11,12 +11,6 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from aiollm.providers.anthropic import AnthropicClient
-from aiollm.providers.anthropic.api import PROVIDER as ANTHROPIC_PROVIDER
-from aiollm.providers.anthropic.client import (
-    session_factory as anthropic_factory,
-)
-from aiollm.providers.anthropic.methods import StreamMessage
 from aiollm.testing.contract.generation import (
     CALLS,
     SCHEMA,
@@ -24,7 +18,14 @@ from aiollm.testing.contract.generation import (
     GenerationContract,
 )
 from aiollm.types.responses import TokenUsage
-from tests.providers.anthropic import test_messages as anthropic
+
+from aiollm_anthropic import AnthropicClient
+from aiollm_anthropic.api import PROVIDER as ANTHROPIC_PROVIDER
+from aiollm_anthropic.client import (
+    session_factory as anthropic_factory,
+)
+from aiollm_anthropic.methods import StreamMessage
+from tests import test_messages as anthropic
 
 
 def anthropic_called() -> dict[str, Any]:

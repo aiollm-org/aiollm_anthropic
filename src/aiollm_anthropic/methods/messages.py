@@ -9,8 +9,10 @@ from pydantic import MISSING, BaseModel, Field, field_validator
 
 from aiollm.enums import BodyFormat, ResponseFormat
 from aiollm.methods.base import BaseAPIMethod, BaseStreamMethod
-from aiollm.providers.anthropic.api import ANTHROPIC_VERSION, API_VERSION
-from aiollm.providers.anthropic.methods.params.messages import (
+from aiollm.types.matchers import EventTypes
+
+from aiollm_anthropic.api import ANTHROPIC_VERSION, API_VERSION
+from aiollm_anthropic.methods.params.messages import (
     AssistantMessageParam,
     CreateMessageParams,
     MetadataParam,
@@ -18,9 +20,8 @@ from aiollm.providers.anthropic.methods.params.messages import (
     SystemMessageParam,
     UserMessageParam,
 )
-from aiollm.providers.anthropic.types.events import MessageStreamEvent
-from aiollm.providers.anthropic.types.messages import Message
-from aiollm.types.matchers import EventTypes
+from aiollm_anthropic.types.events import MessageStreamEvent
+from aiollm_anthropic.types.messages import Message
 
 VERSION_HEADERS: Final[Mapping[str, str]] = {ANTHROPIC_VERSION: API_VERSION}
 """``__request_headers__`` of every Anthropic method.

@@ -13,17 +13,21 @@ import pytest
 from pydantic import ValidationError
 
 from aiollm.http.exceptions.status import ServiceUnavailableError
-from aiollm.providers.anthropic import API_VERSION, AnthropicErrorResolver
-from aiollm.providers.anthropic.adapters.conversions import (
+from aiollm.session.aiohttp import AiohttpSession
+from aiollm.testing import FakeStreamResponse, FakeTransport, Reply
+from aiollm.testing.aiohttp import Recorder
+
+from aiollm_anthropic import API_VERSION, AnthropicErrorResolver
+from aiollm_anthropic.adapters.conversions import (
     message_text,
     message_thinking,
 )
-from aiollm.providers.anthropic.methods import (
+from aiollm_anthropic.methods import (
     VERSION_HEADERS,
     CreateMessage,
     StreamMessage,
 )
-from aiollm.providers.anthropic.types import (
+from aiollm_anthropic.types import (
     InputJSONDelta,
     Message,
     RawContentBlockDeltaEvent,
@@ -37,10 +41,7 @@ from aiollm.providers.anthropic.types import (
     TextDelta,
     ThinkingBlock,
 )
-from aiollm.providers.anthropic.types.shared import UnknownVariant
-from aiollm.session.aiohttp import AiohttpSession
-from aiollm.testing import FakeStreamResponse, FakeTransport, Reply
-from aiollm.testing.aiohttp import Recorder
+from aiollm_anthropic.types.shared import UnknownVariant
 
 MODEL = "claude-opus-5-5"
 

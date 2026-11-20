@@ -1,8 +1,8 @@
 """Regenerate Anthropic's types and request parameters with aiollm-codegen.
 
-Run from the aiollm checkout:
+Run from the aiollm_anthropic checkout:
 
-    uv run python scripts/anthropic/generate_types.py [--codegen DIR]
+    uv run python scripts/generate_types.py [--codegen DIR]
 
 Both inputs are pinned, so the same commit always gives the same files
 (the CI job ``lint and types`` regenerates them and fails on any
@@ -10,9 +10,9 @@ difference). The generator is the ``codegen`` dependency group, a commit
 of aiollm-codegen named in ``pyproject.toml`` and ``uv.lock``;
 ``--codegen DIR`` runs a local checkout instead, to try a change of the
 generator. The types come from the contract snapshot in
-``tests/providers/anthropic/contracts/messages``, derived from the
+``tests/contracts/messages``, derived from the
 pinned ``anthropic`` SDK, and, for the Files API, from
-``tests/providers/anthropic/contracts/sources/anthropic-files.openapi.json``,
+``tests/contracts/sources/anthropic-files.openapi.json``,
 a transcription of Anthropic's API reference. ``ANTHROPIC_VERSION`` is
 the API version of that SDK (a test checks).
 
@@ -33,10 +33,10 @@ import tempfile
 from pathlib import Path
 from typing import Final
 
-ROOT: Final = Path(__file__).resolve().parents[2]
-PACKAGE: Final = ROOT / "src" / "aiollm" / "providers" / "anthropic"
-MODULE: Final = "aiollm.providers.anthropic"
-CONTRACTS: Final = ROOT / "tests" / "providers" / "anthropic" / "contracts"
+ROOT: Final = Path(__file__).resolve().parents[1]
+PACKAGE: Final = ROOT / "src" / "aiollm_anthropic"
+MODULE: Final = "aiollm_anthropic"
+CONTRACTS: Final = ROOT / "tests" / "contracts"
 ANTHROPIC_VERSION: Final = "2026-10-21"
 
 ANTHROPIC_FILES: Final = CONTRACTS / "sources" / "anthropic-files.openapi.json"
@@ -107,7 +107,7 @@ def install(generated: Path) -> None:
         '"""Anthropic\'s own types and the options of a generation call.',
         "",
         "Every module but ``options`` is written by aiollm-codegen through",
-        "``scripts/anthropic/generate_types.py``; do not edit them by hand.",
+        "``scripts/generate_types.py``; do not edit them by hand.",
         '"""',
         "",
         "from __future__ import annotations",

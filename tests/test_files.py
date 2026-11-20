@@ -14,12 +14,13 @@ from typing import Any
 import pytest
 
 from aiollm.http.exceptions.status import BadRequestError, NotFoundError
-from aiollm.providers.anthropic import API_VERSION, AnthropicClient
-from aiollm.providers.anthropic import methods as anthropic
-from aiollm.providers.anthropic.client import session_factory
 from aiollm.testing import TEST_TOKEN, LocalAPI, Reply
 from aiollm.testing.aiohttp import Recorder
 from aiollm.types.files import BytesFile
+
+from aiollm_anthropic import API_VERSION, AnthropicClient
+from aiollm_anthropic import methods as anthropic
+from aiollm_anthropic.client import session_factory
 
 CONTRACTS = Path(__file__).parent / "contracts"
 
