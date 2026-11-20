@@ -11,3 +11,19 @@ earlier changes are in [aiollm's changelog](https://github.com/aiollm-org/aiollm
 ## [Unreleased]
 
 <!-- towncrier release notes start -->
+
+## [0.15.0] - 2026-11-20
+
+### Changed
+
+- **Breaking:** the Anthropic provider is its own package, `aiollm-anthropic`,
+  imported as `aiollm_anthropic`: `aiollm.providers.anthropic` becomes
+  `aiollm_anthropic`, and each of its modules keeps its name
+  (`aiollm.providers.anthropic.types` becomes `aiollm_anthropic.types`, and so
+  on). `aiollm_anthropic.__version__` is its own version.
+- The core this package depends on is now the `aiollm-core` distribution
+  (it was `aiollm`), from PyPI: `aiollm-core>=0.15,<0.16`. The module is
+  still `aiollm`.
+
+[Unreleased]: https://github.com/aiollm-org/aiollm_anthropic/compare/v0.15.0...HEAD
+[0.15.0]: https://github.com/aiollm-org/aiollm_anthropic/releases/tag/v0.15.0
