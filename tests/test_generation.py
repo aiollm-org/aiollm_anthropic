@@ -1,6 +1,6 @@
 """Anthropic generation adapter: shared requests to Messages and back.
 
-The payloads are the reference examples of ``test_anthropic_messages``.
+The payloads are the reference examples of ``test_messages``.
 """
 
 from __future__ import annotations
@@ -44,7 +44,7 @@ from aiollm.types.responses import (
     TextDeltaEvent,
     TokenUsage,
 )
-from tests.providers.test_anthropic_messages import (
+from tests.providers.anthropic.test_messages import (
     MESSAGE,
     MODEL,
     STREAM,

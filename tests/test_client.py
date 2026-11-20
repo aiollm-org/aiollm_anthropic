@@ -1,6 +1,6 @@
 """Anthropic: the error resolver and the requests of its client.
 
-What every provider client shares is in ``test_provider_clients.py``.
+What every provider client shares is in ``test_client_contract.py``.
 
 The error bodies follow the examples of Anthropic's API reference
 (captured 2026-10-30).
