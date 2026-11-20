@@ -593,6 +593,8 @@ class CreateMessageParams(BaseAPIType):
     ]
     model: Annotated[
         Literal[
+            "claude-fable-5-2",
+            "claude-mythos-5-2",
             "claude-haiku-5-5",
             "claude-sonnet-5-5",
             "claude-fable-5-1",
@@ -704,6 +706,8 @@ class MessagesCreateWireBody(BaseAPIType):
     ]
     model: Annotated[
         Literal[
+            "claude-fable-5-2",
+            "claude-mythos-5-2",
             "claude-haiku-5-5",
             "claude-sonnet-5-5",
             "claude-fable-5-1",
@@ -815,6 +819,8 @@ class StreamMessageParams(BaseAPIType):
     ]
     model: Annotated[
         Literal[
+            "claude-fable-5-2",
+            "claude-mythos-5-2",
             "claude-haiku-5-5",
             "claude-sonnet-5-5",
             "claude-fable-5-1",
