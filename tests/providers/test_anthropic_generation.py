@@ -13,13 +13,14 @@ import pytest
 from pydantic import TypeAdapter, ValidationError
 
 from aiollm.client.binding import bind_resource
-from aiollm.enums import IncompleteReason, Provider
+from aiollm.enums import IncompleteReason
 from aiollm.exceptions import RequestValidationError
 from aiollm.http.exceptions.response import APIResponseError
 from aiollm.http.exceptions.status import ServiceUnavailableError
 from aiollm.providers.anthropic import AnthropicClient
 from aiollm.providers.anthropic.adapters import AnthropicGenerationAdapter
 from aiollm.providers.anthropic.adapters.conversions import StreamState
+from aiollm.providers.anthropic.api import PROVIDER as ANTHROPIC_PROVIDER
 from aiollm.providers.anthropic.client import session_factory
 from aiollm.providers.anthropic.methods import CreateMessage, StreamMessage
 from aiollm.providers.anthropic.types import Message, MessageStreamEvent
@@ -204,7 +205,7 @@ def test_finished_message_is_converted() -> None:
     converted = adapter.to_response(raw, REQUEST)
 
     assert converted.id == MESSAGE["id"]
-    assert converted.provider is Provider.ANTHROPIC
+    assert converted.provider == ANTHROPIC_PROVIDER
     assert converted.model == MODEL
     assert converted.text == "Hi! My name is Claude."
     # Input is 2095 + 2051 written to + 2051 read from the cache.

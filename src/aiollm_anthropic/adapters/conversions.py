@@ -192,7 +192,7 @@ def _assistant_blocks(turn: ToolCallTurn) -> list[dict[str, Any]]:
         block and a ``tool_use`` block per call, the arguments parsed.
     """
     native = turn.native
-    if native is not MISSING and native.provider is PROVIDER:
+    if native is not MISSING and native.provider == PROVIDER:
         return [dict(block) for block in native.items]
     blocks: list[dict[str, Any]] = []
     if turn.text is not MISSING:

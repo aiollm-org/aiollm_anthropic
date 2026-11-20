@@ -434,7 +434,7 @@ def _check_arguments(request: GenerationRequest) -> None:
     for item in request.input:
         if not isinstance(item, ToolCallTurn):
             continue
-        if item.native is not MISSING and item.native.provider is PROVIDER:
+        if item.native is not MISSING and item.native.provider == PROVIDER:
             continue
         for call in item.tool_calls:
             try:

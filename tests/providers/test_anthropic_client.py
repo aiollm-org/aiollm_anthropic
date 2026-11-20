@@ -12,7 +12,6 @@ from typing import Any
 
 import pytest
 
-from aiollm.enums import Provider
 from aiollm.http.exceptions.status import (
     APIStatusError,
     BadRequestError,
@@ -28,6 +27,7 @@ from aiollm.providers.anthropic import (
     AnthropicClient,
     AnthropicErrorResolver,
 )
+from aiollm.providers.anthropic.api import PROVIDER as ANTHROPIC_PROVIDER
 from aiollm.providers.anthropic.client import session_factory
 from tests.conftest import (
     TEST_TOKEN,
@@ -76,7 +76,7 @@ def test_error_reads_the_type_message_and_request_id() -> None:
     assert error.error_type == "not_found_error"
     assert error.code is None
     assert error.request_id == "req_011CSHoEeqs5C35K2UUqR7Fy"
-    assert error.provider is Provider.ANTHROPIC
+    assert error.provider == ANTHROPIC_PROVIDER
     assert "Not found" in str(error)
 
 

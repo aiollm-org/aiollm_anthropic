@@ -4,10 +4,12 @@ from __future__ import annotations
 
 from typing import Final
 
+from multidict import istr
+
 from aiollm.enums import Provider
 from aiollm.http.api import BaseAPI
 
-PROVIDER: Final = Provider.ANTHROPIC
+PROVIDER: Final = Provider("anthropic")
 """The provider of this package; its client, resolver and adapter use it."""
 
 
@@ -20,6 +22,9 @@ ANTHROPIC_API: Final[AnthropicAPI] = AnthropicAPI(
     version="v1",
 )
 """The Anthropic API, version 1."""
+
+ANTHROPIC_VERSION: Final[istr] = istr("Anthropic-Version")
+"""Name of the header that carries ``API_VERSION``."""
 
 API_VERSION: Final = "2026-10-21"
 """The ``anthropic-version`` that the library's Anthropic types follow.

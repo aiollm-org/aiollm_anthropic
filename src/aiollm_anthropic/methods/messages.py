@@ -8,9 +8,8 @@ from typing import Annotated, Final
 from pydantic import MISSING, BaseModel, Field, field_validator
 
 from aiollm.enums import BodyFormat, ResponseFormat
-from aiollm.http.headers import ANTHROPIC_VERSION
 from aiollm.methods.base import BaseAPIMethod, BaseStreamMethod
-from aiollm.providers.anthropic.api import API_VERSION
+from aiollm.providers.anthropic.api import ANTHROPIC_VERSION, API_VERSION
 from aiollm.providers.anthropic.methods.params.messages import (
     AssistantMessageParam,
     CreateMessageParams,
