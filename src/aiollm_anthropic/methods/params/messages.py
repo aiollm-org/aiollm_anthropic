@@ -631,7 +631,7 @@ class CreateMessageParams(BaseAPIType):
         Literal["auto", "standard_only"] | MISSING, Field(title="Service Tier")
     ] = MISSING
     speed: Annotated[
-        Literal["standard", "fast"] | None | MISSING, Field(title="Speed")
+        Literal["fast", "standard"] | None | MISSING, Field(title="Speed")
     ] = MISSING
     stop_sequences: Annotated[
         list[str] | MISSING, Field(title="Stop Sequences")
@@ -742,7 +742,7 @@ class MessagesCreateWireBody(BaseAPIType):
         Literal["auto", "standard_only"] | MISSING, Field(title="Service Tier")
     ] = MISSING
     speed: Annotated[
-        Literal["standard", "fast"] | None | MISSING, Field(title="Speed")
+        Literal["fast", "standard"] | None | MISSING, Field(title="Speed")
     ] = MISSING
     stop_sequences: Annotated[
         list[str] | MISSING, Field(title="Stop Sequences")
@@ -853,7 +853,7 @@ class StreamMessageParams(BaseAPIType):
         Literal["auto", "standard_only"] | MISSING, Field(title="Service Tier")
     ] = MISSING
     speed: Annotated[
-        Literal["standard", "fast"] | None | MISSING, Field(title="Speed")
+        Literal["fast", "standard"] | None | MISSING, Field(title="Speed")
     ] = MISSING
     stop_sequences: Annotated[
         list[str] | MISSING, Field(title="Stop Sequences")

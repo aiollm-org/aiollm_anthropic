@@ -3,7 +3,7 @@
  "info": {
   "title": "Anthropic Files API",
   "version": "2026-10-21",
-  "description": "Transcribed by hand from Anthropic's API reference, which publishes no OpenAPI file; the docs-lite dump has no request or list schemas for these endpoints. The reference writes integers as \"number\"; the SDKs type them as integers.",
+  "description": "Transcribed by hand from Anthropic's API reference, which publishes no OpenAPI file. The reference writes integers as \"number\"; the SDKs type them as integers.",
   "x-retrieved": "2026-11-19",
   "x-sources": [
    "https://platform.claude.com/docs/en/api/files/upload",
