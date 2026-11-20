@@ -1,0 +1,8 @@
+{
+ "https://platform.claude.com/docs/en/api/files/delete": "1b863632659f7afc2ada8e870767e3c2c074080a8061e055f16a351bf8578dea",
+ "https://platform.claude.com/docs/en/api/files/download": "3a5561ba3981ea9c90d631cd8c24933bb0099cc20328a458978cab4eca940918",
+ "https://platform.claude.com/docs/en/api/files/list": "03aef38c1371c5db6ef57001d906f8af999cd1bde50003b15241d96f5b406952",
+ "https://platform.claude.com/docs/en/api/files/retrieve_metadata": "63cd352c9703bff5bf2ad448ffec811614a903a5c1cc65e936bc8c8d661d6ad9",
+ "https://platform.claude.com/docs/en/api/files/upload": "1dadb6b351dd345d0af998d55bff7aea375ab428980484947fbc476e4ccfd069",
+ "https://platform.claude.com/docs/en/build-with-claude/files": "d60a517ec614c8aba421b69aadbca6748fad9b435dd9d8279392cf4081d9fcd8"
+}
