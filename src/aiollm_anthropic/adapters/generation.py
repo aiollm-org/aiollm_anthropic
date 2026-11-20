@@ -18,37 +18,6 @@ from aiollm.adapters.validation import (
 )
 from aiollm.enums import ToolChoice
 from aiollm.exceptions import RequestValidationError
-from aiollm.providers.anthropic.adapters.conversions import (
-    INPUT_CONVERSION,
-    STOP_CONVERSION,
-    USAGE_CONVERSION,
-    StreamState,
-    message_native,
-    message_text,
-    message_thinking,
-    message_tool_calls,
-)
-from aiollm.providers.anthropic.api import PROVIDER
-from aiollm.providers.anthropic.methods.messages import (
-    CreateMessage,
-    StreamMessage,
-)
-from aiollm.providers.anthropic.types import (
-    InputJSONDelta,
-    Message,
-    MessageStreamEvent,
-    RawContentBlockDeltaEvent,
-    RawContentBlockStartEvent,
-    RawContentBlockStopEvent,
-    RawMessageDeltaEvent,
-    RawMessageStartEvent,
-    RawMessageStopEvent,
-    SignatureDelta,
-    TextDelta,
-    ThinkingDelta,
-    ToolUseBlock,
-)
-from aiollm.providers.anthropic.types.options import AnthropicGenerationOptions
 from aiollm.types.requests.generation import (
     ForcedTool,
     GenerationRequest,
@@ -68,11 +37,44 @@ from aiollm.types.responses.events import (
 )
 from aiollm.types.responses.generation import GenerationResponse
 
+from aiollm_anthropic.adapters.conversions import (
+    INPUT_CONVERSION,
+    STOP_CONVERSION,
+    USAGE_CONVERSION,
+    StreamState,
+    message_native,
+    message_text,
+    message_thinking,
+    message_tool_calls,
+)
+from aiollm_anthropic.api import PROVIDER
+from aiollm_anthropic.methods.messages import (
+    CreateMessage,
+    StreamMessage,
+)
+from aiollm_anthropic.types import (
+    InputJSONDelta,
+    Message,
+    MessageStreamEvent,
+    RawContentBlockDeltaEvent,
+    RawContentBlockStartEvent,
+    RawContentBlockStopEvent,
+    RawMessageDeltaEvent,
+    RawMessageStartEvent,
+    RawMessageStopEvent,
+    SignatureDelta,
+    TextDelta,
+    ThinkingDelta,
+    ToolUseBlock,
+)
+from aiollm_anthropic.types.options import AnthropicGenerationOptions
+
 if TYPE_CHECKING:
     from aiollm.adapters.protocols import IConversion
     from aiollm.adapters.stop import Stop
-    from aiollm.providers.anthropic.types import Delta, Usage
     from aiollm.types.responses.generation import TokenUsage
+
+    from aiollm_anthropic.types import Delta, Usage
 
 DEFAULT_MAX_TOKENS: Final = 16000
 """``max_tokens`` sent when the request has no ``max_output_tokens``.

@@ -12,18 +12,19 @@ from typing import Any
 
 from aiollm.adapters import BaseConversion, IConversion, Stop
 from aiollm.enums import IncompleteReason
-from aiollm.providers.anthropic.adapters import AnthropicGenerationAdapter
-from aiollm.providers.anthropic.adapters.conversions import (
+from aiollm.types.requests import InputItem
+from aiollm.types.responses import CompletedEvent, TokenUsage
+
+from aiollm_anthropic.adapters import AnthropicGenerationAdapter
+from aiollm_anthropic.adapters.conversions import (
     INPUT_CONVERSION as INPUT,
 )
-from aiollm.providers.anthropic.adapters.conversions import (
+from aiollm_anthropic.adapters.conversions import (
     STOP_CONVERSION,
     USAGE_CONVERSION,
 )
-from aiollm.providers.anthropic.types import Delta, Message, Usage
-from aiollm.types.requests import InputItem
-from aiollm.types.responses import CompletedEvent, TokenUsage
-from tests.providers.anthropic import test_generation as anthropic
+from aiollm_anthropic.types import Delta, Message, Usage
+from tests import test_generation as anthropic
 
 USAGE = TokenUsage(input_tokens=1, output_tokens=2, total_tokens=3)
 

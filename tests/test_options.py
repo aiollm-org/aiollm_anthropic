@@ -22,12 +22,13 @@ import pytest
 from pydantic import MISSING, BaseModel
 
 from aiollm.enums import Effort, ToolChoice
-from aiollm.providers.anthropic.adapters import AnthropicGenerationAdapter
-from aiollm.providers.anthropic.methods import CreateMessage
-from aiollm.providers.anthropic.types.options import (
+from aiollm.types.requests import GenerationRequest, Tool
+
+from aiollm_anthropic.adapters import AnthropicGenerationAdapter
+from aiollm_anthropic.methods import CreateMessage
+from aiollm_anthropic.types.options import (
     AnthropicGenerationOptions,
 )
-from aiollm.types.requests import GenerationRequest, Tool
 
 CASES = [
     (AnthropicGenerationOptions, CreateMessage, AnthropicGenerationAdapter())

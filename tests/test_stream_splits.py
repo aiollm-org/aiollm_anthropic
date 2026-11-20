@@ -14,12 +14,13 @@ from typing import Any
 
 import pytest
 
-from aiollm.providers.anthropic.adapters import AnthropicGenerationAdapter
 from aiollm.resources.generation import GenerationResource
 from aiollm.testing import FakeStreamResponse, FakeTransport
 from aiollm.types.requests.generation import GenerationRequest
 from aiollm.types.responses.events import TextDeltaEvent
-from tests.providers.anthropic.test_wire_contracts import load
+
+from aiollm_anthropic.adapters import AnthropicGenerationAdapter
+from tests.test_wire_contracts import load
 
 REQUEST = GenerationRequest(model="model-1", input="Hi")
 

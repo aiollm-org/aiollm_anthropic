@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
-from aiollm.providers.anthropic.adapters.conversions import (
+from aiollm_anthropic.adapters.conversions import (
     message_text,
     message_thinking,
     message_tool_calls,
 )
-from aiollm.providers.anthropic.adapters.files import (
+from aiollm_anthropic.adapters.files import (
     AnthropicFilesAdapter,
 )
-from aiollm.providers.anthropic.adapters.generation import (
+from aiollm_anthropic.adapters.generation import (
     AnthropicGenerationAdapter,
 )
 

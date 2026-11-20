@@ -8,7 +8,7 @@ import tomllib
 from pathlib import Path
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[1]
 HERE = Path(__file__).parent
 
 
@@ -17,7 +17,7 @@ def test_the_pinned_sdk_is_the_snapshot_one() -> None:
     # pin of the upstream group and the API version the types are made
     # for change together.
     script: dict[str, Any] = runpy.run_path(
-        str(ROOT / "scripts" / "anthropic" / "generate_types.py")
+        str(ROOT / "scripts" / "generate_types.py")
     )
     manifest = json.loads(
         (HERE / "contracts" / "manifest.json").read_text("utf-8")

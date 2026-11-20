@@ -8,25 +8,26 @@ from aiollm.client.base import BaseProviderClient
 from aiollm.client.binding import bind_resource
 from aiollm.http.auth import BearerAuth
 from aiollm.http.headers import AUTHORIZATION, X_API_KEY
-from aiollm.providers.anthropic.adapters.files import AnthropicFilesAdapter
-from aiollm.providers.anthropic.adapters.generation import (
-    DEFAULT_MAX_TOKENS,
-    AnthropicGenerationAdapter,
-)
-from aiollm.providers.anthropic.api import ANTHROPIC_API, PROVIDER
-from aiollm.providers.anthropic.resolver import AnthropicErrorResolver
-from aiollm.providers.anthropic.types.events import MessageStreamEvent
-from aiollm.providers.anthropic.types.files import (
-    FileMetadata,
-    ListFilesResponse,
-)
-from aiollm.providers.anthropic.types.messages import Message
-from aiollm.providers.anthropic.types.options import AnthropicGenerationOptions
 from aiollm.resources.files import FilesResource
 from aiollm.resources.generation import GenerationResource
 from aiollm.session.aiohttp import AiohttpSession, AiohttpSessionOptions
 from aiollm.session.factory import SessionFactory
 from aiollm.session.protocols import ISession
+
+from aiollm_anthropic.adapters.files import AnthropicFilesAdapter
+from aiollm_anthropic.adapters.generation import (
+    DEFAULT_MAX_TOKENS,
+    AnthropicGenerationAdapter,
+)
+from aiollm_anthropic.api import ANTHROPIC_API, PROVIDER
+from aiollm_anthropic.resolver import AnthropicErrorResolver
+from aiollm_anthropic.types.events import MessageStreamEvent
+from aiollm_anthropic.types.files import (
+    FileMetadata,
+    ListFilesResponse,
+)
+from aiollm_anthropic.types.messages import Message
+from aiollm_anthropic.types.options import AnthropicGenerationOptions
 
 session_factory: Final = SessionFactory(
     AiohttpSession,

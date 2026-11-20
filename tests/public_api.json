@@ -1,19 +1,20 @@
 {
-  "aiollm.providers.anthropic": [
+  "aiollm_anthropic": [
     "ANTHROPIC_API",
     "API_VERSION",
     "AnthropicAPI",
     "AnthropicClient",
-    "AnthropicErrorResolver"
+    "AnthropicErrorResolver",
+    "__version__"
   ],
-  "aiollm.providers.anthropic.adapters": [
+  "aiollm_anthropic.adapters": [
     "AnthropicFilesAdapter",
     "AnthropicGenerationAdapter",
     "message_text",
     "message_thinking",
     "message_tool_calls"
   ],
-  "aiollm.providers.anthropic.methods": [
+  "aiollm_anthropic.methods": [
     "CreateFile",
     "CreateMessage",
     "DeleteFile",
@@ -23,7 +24,7 @@
     "StreamMessage",
     "VERSION_HEADERS"
   ],
-  "aiollm.providers.anthropic.methods.params": [
+  "aiollm_anthropic.methods.params": [
     "AssistantMessageParam",
     "Base64ImageSourceParam",
     "Base64PDFSource",
@@ -231,7 +232,7 @@
     "WebSearchToolResultBlockParam",
     "WebSearchToolResultErrorObject"
   ],
-  "aiollm.providers.anthropic.types": [
+  "aiollm_anthropic.types": [
     "AnthropicGenerationOptions",
     "Base64PDFSource",
     "BashCodeExecutionOutputBlock",

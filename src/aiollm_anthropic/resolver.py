@@ -12,7 +12,8 @@ from aiollm.http.exceptions.status import (
     QuotaExceededError,
     ServiceUnavailableError,
 )
-from aiollm.providers.anthropic.api import PROVIDER
+
+from aiollm_anthropic.api import PROVIDER
 
 OVERLOADED: Final = 529
 """Status of ``overloaded_error``: the API is temporarily overloaded."""

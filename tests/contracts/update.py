@@ -17,7 +17,7 @@ hand.
 Usage (the ``upstream`` group pins the SDK)::
 
     uv run --group upstream python -m \
-        tests.providers.anthropic.contracts.update
+        tests.contracts.update
 """
 
 from __future__ import annotations

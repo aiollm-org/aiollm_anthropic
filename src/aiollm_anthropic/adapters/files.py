@@ -11,22 +11,23 @@ from pydantic import MISSING
 
 from aiollm.adapters.base import BaseFilesAdapter
 from aiollm.adapters.validation import checked_options, request_errors
-from aiollm.providers.anthropic.api import PROVIDER
-from aiollm.providers.anthropic.methods.files import (
+from aiollm.types.requests.content import ProviderFile
+from aiollm.types.requests.generation import NoProviderOptions
+from aiollm.types.requests.upload import FileUpload
+from aiollm.types.responses.files import StoredFile
+
+from aiollm_anthropic.api import PROVIDER
+from aiollm_anthropic.methods.files import (
     CreateFile,
     DeleteFile,
     DownloadFile,
     ListFiles,
     RetrieveFile,
 )
-from aiollm.providers.anthropic.types.files import (
+from aiollm_anthropic.types.files import (
     FileMetadata,
     ListFilesResponse,
 )
-from aiollm.types.requests.content import ProviderFile
-from aiollm.types.requests.generation import NoProviderOptions
-from aiollm.types.requests.upload import FileUpload
-from aiollm.types.responses.files import StoredFile
 
 DEFAULT_PAGE_SIZE: Final = 100
 """Files asked for in one page of ``client.files.list()``."""

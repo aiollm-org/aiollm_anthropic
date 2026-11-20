@@ -23,14 +23,15 @@ from aiollm.http.exceptions.status import (
     ServiceUnavailableError,
 )
 from aiollm.methods.base import BaseAPIMethod
-from aiollm.providers.anthropic import (
+from aiollm.testing import TEST_TOKEN, LocalAPI, Reply, make_method
+from aiollm.testing.aiohttp import Recorder
+
+from aiollm_anthropic import (
     AnthropicClient,
     AnthropicErrorResolver,
 )
-from aiollm.providers.anthropic.api import PROVIDER as ANTHROPIC_PROVIDER
-from aiollm.providers.anthropic.client import session_factory
-from aiollm.testing import TEST_TOKEN, LocalAPI, Reply, make_method
-from aiollm.testing.aiohttp import Recorder
+from aiollm_anthropic.api import PROVIDER as ANTHROPIC_PROVIDER
+from aiollm_anthropic.client import session_factory
 
 SPEND_CAP_MESSAGE = (
     "You have reached your API usage limits: your organization has "

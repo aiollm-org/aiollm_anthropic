@@ -15,24 +15,25 @@ from aiollm import GenerationStream, IGenerationClient, Provider, Stream
 from aiollm.adapters import IConversion
 from aiollm.adapters import Stop as GenerationStop
 from aiollm.client import BaseClient
-from aiollm.providers.anthropic import AnthropicClient
-from aiollm.providers.anthropic.adapters import AnthropicGenerationAdapter
-from aiollm.providers.anthropic.methods import CreateMessage, StreamMessage
-from aiollm.providers.anthropic.methods.params import UserMessageParam
-from aiollm.providers.anthropic.types import (
+from aiollm.resources import GenerationResource, IFilesClient
+from aiollm.session.aiohttp import AiohttpSession
+from aiollm.types.requests import DocumentPart, GenerationRequest, ProviderFile
+from aiollm.types.responses import GenerationResponse, StoredFile, TokenUsage
+
+from aiollm_anthropic import AnthropicClient
+from aiollm_anthropic.adapters import AnthropicGenerationAdapter
+from aiollm_anthropic.methods import CreateMessage, StreamMessage
+from aiollm_anthropic.methods.params import UserMessageParam
+from aiollm_anthropic.types import (
     Delta,
     FileMetadata,
     Message,
     MessageStreamEvent,
     Usage,
 )
-from aiollm.providers.anthropic.types.options import (
+from aiollm_anthropic.types.options import (
     AnthropicGenerationOptions,
 )
-from aiollm.resources import GenerationResource, IFilesClient
-from aiollm.session.aiohttp import AiohttpSession
-from aiollm.types.requests import DocumentPart, GenerationRequest, ProviderFile
-from aiollm.types.responses import GenerationResponse, StoredFile, TokenUsage
 
 
 async def messages_infer_types(session: AiohttpSession) -> None:

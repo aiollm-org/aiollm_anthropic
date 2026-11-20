@@ -17,16 +17,6 @@ from aiollm.enums import IncompleteReason
 from aiollm.exceptions import RequestValidationError
 from aiollm.http.exceptions.response import APIResponseError
 from aiollm.http.exceptions.status import ServiceUnavailableError
-from aiollm.providers.anthropic import AnthropicClient
-from aiollm.providers.anthropic.adapters import AnthropicGenerationAdapter
-from aiollm.providers.anthropic.adapters.conversions import StreamState
-from aiollm.providers.anthropic.api import PROVIDER as ANTHROPIC_PROVIDER
-from aiollm.providers.anthropic.client import session_factory
-from aiollm.providers.anthropic.methods import CreateMessage, StreamMessage
-from aiollm.providers.anthropic.types import Message, MessageStreamEvent
-from aiollm.providers.anthropic.types.options import (
-    AnthropicGenerationOptions,
-)
 from aiollm.resources.generation import GenerationResource
 from aiollm.testing import TEST_TOKEN, LocalAPI, Reply
 from aiollm.testing.aiohttp import Recorder
@@ -44,7 +34,18 @@ from aiollm.types.responses import (
     TextDeltaEvent,
     TokenUsage,
 )
-from tests.providers.anthropic.test_messages import (
+
+from aiollm_anthropic import AnthropicClient
+from aiollm_anthropic.adapters import AnthropicGenerationAdapter
+from aiollm_anthropic.adapters.conversions import StreamState
+from aiollm_anthropic.api import PROVIDER as ANTHROPIC_PROVIDER
+from aiollm_anthropic.client import session_factory
+from aiollm_anthropic.methods import CreateMessage, StreamMessage
+from aiollm_anthropic.types import Message, MessageStreamEvent
+from aiollm_anthropic.types.options import (
+    AnthropicGenerationOptions,
+)
+from tests.test_messages import (
     MESSAGE,
     MODEL,
     STREAM,

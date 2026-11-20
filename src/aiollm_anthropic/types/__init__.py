@@ -1,12 +1,12 @@
 """Anthropic's own types and the options of a generation call.
 
 Every module but ``options`` is written by aiollm-codegen through
-``scripts/anthropic/generate_types.py``; do not edit them by hand.
+``scripts/generate_types.py``; do not edit them by hand.
 """
 
 from __future__ import annotations
 
-from aiollm.providers.anthropic.types.options import (
+from aiollm_anthropic.types.options import (
     AnthropicGenerationOptions,
     ThinkingAdaptive,
     ThinkingBetweenTools,

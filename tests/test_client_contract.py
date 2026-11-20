@@ -8,13 +8,14 @@ The scenarios of ``aiollm.testing.contract.clients`` run against
 from __future__ import annotations
 
 from aiollm.http.auth import APIKeyAuth, BearerAuth
-from aiollm.providers.anthropic import (
+from aiollm.testing.contract.clients import ClientCase, ClientContract
+
+from aiollm_anthropic import (
     ANTHROPIC_API,
     AnthropicClient,
     AnthropicErrorResolver,
 )
-from aiollm.providers.anthropic.api import PROVIDER
-from aiollm.testing.contract.clients import ClientCase, ClientContract
+from aiollm_anthropic.api import PROVIDER
 
 ANTHROPIC = ClientCase(
     client=AnthropicClient,
