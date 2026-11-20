@@ -8127,8 +8127,8 @@
    "anyOf": [
     {
      "enum": [
-      "standard",
-      "fast"
+      "fast",
+      "standard"
      ],
      "type": "string"
     },
