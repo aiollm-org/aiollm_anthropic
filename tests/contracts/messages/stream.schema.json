@@ -90,7 +90,7 @@
     "content": {
      "anyOf": [
       {
-       "$ref": "#/$defs/BashCodeExecutionToolResultError"
+       "$ref": "#/$defs/BashCodeExecutionToolResultErrorObject"
       },
       {
        "$ref": "#/$defs/BashCodeExecutionResultBlock"
@@ -116,7 +116,7 @@
    "title": "BashCodeExecutionToolResultBlock",
    "type": "object"
   },
-  "BashCodeExecutionToolResultError": {
+  "BashCodeExecutionToolResultErrorObject": {
    "additionalProperties": true,
    "properties": {
     "error_code": {
@@ -140,7 +140,7 @@
     "error_code",
     "type"
    ],
-   "title": "BashCodeExecutionToolResultError",
+   "title": "BashCodeExecutionToolResultErrorObject",
    "type": "object"
   },
   "CacheCreation": {
@@ -663,7 +663,7 @@
     "content": {
      "anyOf": [
       {
-       "$ref": "#/$defs/CodeExecutionToolResultError"
+       "$ref": "#/$defs/CodeExecutionToolResultErrorObject"
       },
       {
        "$ref": "#/$defs/CodeExecutionResultBlock"
@@ -692,7 +692,7 @@
    "title": "CodeExecutionToolResultBlock",
    "type": "object"
   },
-  "CodeExecutionToolResultError": {
+  "CodeExecutionToolResultErrorObject": {
    "additionalProperties": true,
    "properties": {
     "error_code": {
@@ -715,7 +715,7 @@
     "error_code",
     "type"
    ],
-   "title": "CodeExecutionToolResultError",
+   "title": "CodeExecutionToolResultErrorObject",
    "type": "object"
   },
   "Container": {
@@ -1103,6 +1103,8 @@
      "anyOf": [
       {
        "enum": [
+        "claude-fable-5-2",
+        "claude-mythos-5-2",
         "claude-haiku-5-5",
         "claude-sonnet-5-5",
         "claude-fable-5-1",
@@ -1873,7 +1875,7 @@
     "content": {
      "anyOf": [
       {
-       "$ref": "#/$defs/TextEditorCodeExecutionToolResultError"
+       "$ref": "#/$defs/TextEditorCodeExecutionToolResultErrorObject"
       },
       {
        "$ref": "#/$defs/TextEditorCodeExecutionViewResultBlock"
@@ -1905,7 +1907,7 @@
    "title": "TextEditorCodeExecutionToolResultBlock",
    "type": "object"
   },
-  "TextEditorCodeExecutionToolResultError": {
+  "TextEditorCodeExecutionToolResultErrorObject": {
    "additionalProperties": true,
    "properties": {
     "error_code": {
@@ -1941,7 +1943,7 @@
     "error_code",
     "type"
    ],
-   "title": "TextEditorCodeExecutionToolResultError",
+   "title": "TextEditorCodeExecutionToolResultErrorObject",
    "type": "object"
   },
   "TextEditorCodeExecutionViewResultBlock": {
@@ -2081,7 +2083,7 @@
     "content": {
      "anyOf": [
       {
-       "$ref": "#/$defs/ToolSearchToolResultError"
+       "$ref": "#/$defs/ToolSearchToolResultErrorObject"
       },
       {
        "$ref": "#/$defs/ToolSearchToolSearchResultBlock"
@@ -2107,7 +2109,7 @@
    "title": "ToolSearchToolResultBlock",
    "type": "object"
   },
-  "ToolSearchToolResultError": {
+  "ToolSearchToolResultErrorObject": {
    "additionalProperties": true,
    "properties": {
     "error_code": {
@@ -2142,7 +2144,7 @@
     "error_code",
     "type"
    ],
-   "title": "ToolSearchToolResultError",
+   "title": "ToolSearchToolResultErrorObject",
    "type": "object"
   },
   "ToolSearchToolSearchResultBlock": {
@@ -2534,7 +2536,7 @@
     "content": {
      "anyOf": [
       {
-       "$ref": "#/$defs/WebSearchToolResultError"
+       "$ref": "#/$defs/WebSearchToolResultErrorObject"
       },
       {
        "items": {
@@ -2563,7 +2565,7 @@
    "title": "WebSearchToolResultBlock",
    "type": "object"
   },
-  "WebSearchToolResultError": {
+  "WebSearchToolResultErrorObject": {
    "additionalProperties": true,
    "properties": {
     "error_code": {
@@ -2588,7 +2590,7 @@
     "error_code",
     "type"
    ],
-   "title": "WebSearchToolResultError",
+   "title": "WebSearchToolResultErrorObject",
    "type": "object"
   }
  },

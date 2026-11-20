@@ -79,10 +79,10 @@ class BashCodeExecutionResultBlockParam(BaseAPIType):
     ] = "bash_code_execution_result"
 
 
-class BashCodeExecutionToolResultError(BaseAPIType):
-    """`BashCodeExecutionToolResultError`."""
+class BashCodeExecutionToolResultErrorObject(BaseAPIType):
+    """`BashCodeExecutionToolResultErrorObject`."""
 
-    __upstream_schema__ = "BashCodeExecutionToolResultError"
+    __upstream_schema__ = "BashCodeExecutionToolResultErrorObject"
     model_config = ConfigDict(extra="allow")
     error_code: Annotated[
         Literal[
@@ -745,10 +745,10 @@ class CodeExecutionTool20260521Param(BaseAPIType):
     strict: Annotated[bool | MISSING, Field(title="Strict")] = MISSING
 
 
-class CodeExecutionToolResultError(BaseAPIType):
-    """`CodeExecutionToolResultError` from the Anthropic Messages API."""
+class CodeExecutionToolResultErrorObject(BaseAPIType):
+    """`CodeExecutionToolResultErrorObject`."""
 
-    __upstream_schema__ = "CodeExecutionToolResultError"
+    __upstream_schema__ = "CodeExecutionToolResultErrorObject"
     model_config = ConfigDict(extra="allow")
     error_code: Annotated[
         Literal[
@@ -1286,10 +1286,10 @@ class TextEditorCodeExecutionStrReplaceResultBlockParam(BaseAPIType):
     )
 
 
-class TextEditorCodeExecutionToolResultError(BaseAPIType):
-    """`TextEditorCodeExecutionToolResultError`."""
+class TextEditorCodeExecutionToolResultErrorObject(BaseAPIType):
+    """`TextEditorCodeExecutionToolResultErrorObject`."""
 
-    __upstream_schema__ = "TextEditorCodeExecutionToolResultError"
+    __upstream_schema__ = "TextEditorCodeExecutionToolResultErrorObject"
     model_config = ConfigDict(extra="allow")
     error_code: Annotated[
         Literal[
@@ -1592,10 +1592,10 @@ class ToolSearchToolRegex20251119Param(BaseAPIType):
     strict: Annotated[bool | MISSING, Field(title="Strict")] = MISSING
 
 
-class ToolSearchToolResultError(BaseAPIType):
-    """`ToolSearchToolResultError` from the Anthropic Messages API."""
+class ToolSearchToolResultErrorObject(BaseAPIType):
+    """`ToolSearchToolResultErrorObject`."""
 
-    __upstream_schema__ = "ToolSearchToolResultError"
+    __upstream_schema__ = "ToolSearchToolResultErrorObject"
     model_config = ConfigDict(extra="allow")
     error_code: Annotated[
         Literal[
@@ -2071,10 +2071,10 @@ class WebSearchTool20260318Param(BaseAPIType):
     user_location: UserLocationParam | None | MISSING = MISSING
 
 
-class WebSearchToolRequestErrorParam(BaseAPIType):
-    """`WebSearchToolRequestErrorParam` from the Anthropic Messages API."""
+class WebSearchToolRequestErrorObjectParam(BaseAPIType):
+    """`WebSearchToolRequestErrorObjectParam`."""
 
-    __upstream_schema__ = "WebSearchToolRequestErrorParam"
+    __upstream_schema__ = "WebSearchToolRequestErrorObjectParam"
     model_config = ConfigDict(extra="forbid")
     error_code: Annotated[
         Literal[
@@ -2098,7 +2098,7 @@ class WebSearchToolResultBlockParam(BaseAPIType):
     __upstream_schema__ = "WebSearchToolResultBlockParam"
     model_config = ConfigDict(extra="forbid")
     content: Annotated[
-        list[WebSearchResultBlockParam] | WebSearchToolRequestErrorParam,
+        list[WebSearchResultBlockParam] | WebSearchToolRequestErrorObjectParam,
         Field(title="Content"),
     ]
     tool_use_id: Annotated[str, Field(title="Tool Use Id")]
@@ -2115,10 +2115,10 @@ class WebSearchToolResultBlockParam(BaseAPIType):
     ] = MISSING
 
 
-class WebSearchToolResultError(BaseAPIType):
-    """`WebSearchToolResultError` from the Anthropic Messages API."""
+class WebSearchToolResultErrorObject(BaseAPIType):
+    """`WebSearchToolResultErrorObject` from the Anthropic Messages API."""
 
-    __upstream_schema__ = "WebSearchToolResultError"
+    __upstream_schema__ = "WebSearchToolResultErrorObject"
     model_config = ConfigDict(extra="allow")
     error_code: Annotated[
         Literal[
@@ -2142,7 +2142,7 @@ class BashCodeExecutionToolResultBlock(BaseAPIType):
     __upstream_schema__ = "BashCodeExecutionToolResultBlock"
     model_config = ConfigDict(extra="allow")
     content: Annotated[
-        BashCodeExecutionToolResultError | BashCodeExecutionResultBlock,
+        BashCodeExecutionToolResultErrorObject | BashCodeExecutionResultBlock,
         Field(title="Content"),
     ]
     tool_use_id: Annotated[str, Field(title="Tool Use Id")]
@@ -2306,7 +2306,7 @@ class CodeExecutionToolResultBlock(BaseAPIType):
     __upstream_schema__ = "CodeExecutionToolResultBlock"
     model_config = ConfigDict(extra="allow")
     content: Annotated[
-        CodeExecutionToolResultError
+        CodeExecutionToolResultErrorObject
         | CodeExecutionResultBlock
         | EncryptedCodeExecutionResultBlock,
         Field(title="Content"),
@@ -2418,7 +2418,7 @@ class TextEditorCodeExecutionToolResultBlock(BaseAPIType):
     __upstream_schema__ = "TextEditorCodeExecutionToolResultBlock"
     model_config = ConfigDict(extra="allow")
     content: Annotated[
-        TextEditorCodeExecutionToolResultError
+        TextEditorCodeExecutionToolResultErrorObject
         | TextEditorCodeExecutionViewResultBlock
         | TextEditorCodeExecutionCreateResultBlock
         | TextEditorCodeExecutionStrReplaceResultBlock,
@@ -2455,7 +2455,7 @@ class ToolSearchToolResultBlock(BaseAPIType):
     __upstream_schema__ = "ToolSearchToolResultBlock"
     model_config = ConfigDict(extra="allow")
     content: Annotated[
-        ToolSearchToolResultError | ToolSearchToolSearchResultBlock,
+        ToolSearchToolResultErrorObject | ToolSearchToolSearchResultBlock,
         Field(title="Content"),
     ]
     tool_use_id: Annotated[str, Field(title="Tool Use Id")]
@@ -2606,7 +2606,7 @@ class WebSearchToolResultBlock(BaseAPIType):
         Field(title="Caller"),
     ] = MISSING
     content: Annotated[
-        WebSearchToolResultError | list[WebSearchResultBlock],
+        WebSearchToolResultErrorObject | list[WebSearchResultBlock],
         Field(title="Content"),
     ]
     tool_use_id: Annotated[str, Field(title="Tool Use Id")]
@@ -2882,7 +2882,7 @@ BashCodeExecutionOutputBlock.model_rebuild()
 BashCodeExecutionOutputBlockParam.model_rebuild()
 BashCodeExecutionResultBlock.model_rebuild()
 BashCodeExecutionResultBlockParam.model_rebuild()
-BashCodeExecutionToolResultError.model_rebuild()
+BashCodeExecutionToolResultErrorObject.model_rebuild()
 BashCodeExecutionToolResultErrorParam.model_rebuild()
 BrowserCloseTabConfigParam.model_rebuild()
 BrowserDoubleClickConfigParam.model_rebuild()
@@ -2928,7 +2928,7 @@ CodeExecutionTool20250522Param.model_rebuild()
 CodeExecutionTool20250825Param.model_rebuild()
 CodeExecutionTool20260120Param.model_rebuild()
 CodeExecutionTool20260521Param.model_rebuild()
-CodeExecutionToolResultError.model_rebuild()
+CodeExecutionToolResultErrorObject.model_rebuild()
 CodeExecutionToolResultErrorParam.model_rebuild()
 ComputerCursorPositionConfigParam.model_rebuild()
 ComputerDoubleClickConfigParam.model_rebuild()
@@ -2964,7 +2964,7 @@ TextEditorCodeExecutionCreateResultBlock.model_rebuild()
 TextEditorCodeExecutionCreateResultBlockParam.model_rebuild()
 TextEditorCodeExecutionStrReplaceResultBlock.model_rebuild()
 TextEditorCodeExecutionStrReplaceResultBlockParam.model_rebuild()
-TextEditorCodeExecutionToolResultError.model_rebuild()
+TextEditorCodeExecutionToolResultErrorObject.model_rebuild()
 TextEditorCodeExecutionToolResultErrorParam.model_rebuild()
 TextEditorCodeExecutionViewResultBlock.model_rebuild()
 TextEditorCodeExecutionViewResultBlockParam.model_rebuild()
@@ -2979,7 +2979,7 @@ ToolReferenceBlock.model_rebuild()
 ToolReferenceBlockParam.model_rebuild()
 ToolSearchToolBm2520251119Param.model_rebuild()
 ToolSearchToolRegex20251119Param.model_rebuild()
-ToolSearchToolResultError.model_rebuild()
+ToolSearchToolResultErrorObject.model_rebuild()
 ToolSearchToolResultErrorParam.model_rebuild()
 ToolSearchToolSearchResultBlock.model_rebuild()
 ToolSearchToolSearchResultBlockParam.model_rebuild()
@@ -2999,9 +2999,9 @@ WebSearchResultBlockParam.model_rebuild()
 WebSearchTool20250305Param.model_rebuild()
 WebSearchTool20260209Param.model_rebuild()
 WebSearchTool20260318Param.model_rebuild()
-WebSearchToolRequestErrorParam.model_rebuild()
+WebSearchToolRequestErrorObjectParam.model_rebuild()
 WebSearchToolResultBlockParam.model_rebuild()
-WebSearchToolResultError.model_rebuild()
+WebSearchToolResultErrorObject.model_rebuild()
 BashCodeExecutionToolResultBlock.model_rebuild()
 BashCodeExecutionToolResultBlockParam.model_rebuild()
 BrowserStateBlockParam.model_rebuild()
@@ -3034,7 +3034,7 @@ __all__ = [
     "BashCodeExecutionResultBlockParam",
     "BashCodeExecutionToolResultBlock",
     "BashCodeExecutionToolResultBlockParam",
-    "BashCodeExecutionToolResultError",
+    "BashCodeExecutionToolResultErrorObject",
     "BashCodeExecutionToolResultErrorParam",
     "BrowserCloseTabConfigParam",
     "BrowserDoubleClickConfigParam",
@@ -3085,7 +3085,7 @@ __all__ = [
     "CodeExecutionTool20260521Param",
     "CodeExecutionToolResultBlock",
     "CodeExecutionToolResultBlockParam",
-    "CodeExecutionToolResultError",
+    "CodeExecutionToolResultErrorObject",
     "CodeExecutionToolResultErrorParam",
     "ComputerCursorPositionConfigParam",
     "ComputerDoubleClickConfigParam",
@@ -3126,7 +3126,7 @@ __all__ = [
     ("TextEditorCodeExecutionStrReplaceResultBlockParam"),
     "TextEditorCodeExecutionToolResultBlock",
     "TextEditorCodeExecutionToolResultBlockParam",
-    "TextEditorCodeExecutionToolResultError",
+    "TextEditorCodeExecutionToolResultErrorObject",
     "TextEditorCodeExecutionToolResultErrorParam",
     "TextEditorCodeExecutionViewResultBlock",
     "TextEditorCodeExecutionViewResultBlockParam",
@@ -3143,7 +3143,7 @@ __all__ = [
     "ToolSearchToolRegex20251119Param",
     "ToolSearchToolResultBlock",
     "ToolSearchToolResultBlockParam",
-    "ToolSearchToolResultError",
+    "ToolSearchToolResultErrorObject",
     "ToolSearchToolResultErrorParam",
     "ToolSearchToolSearchResultBlock",
     "ToolSearchToolSearchResultBlockParam",
@@ -3172,8 +3172,8 @@ __all__ = [
     "WebSearchTool20250305Param",
     "WebSearchTool20260209Param",
     "WebSearchTool20260318Param",
-    "WebSearchToolRequestErrorParam",
+    "WebSearchToolRequestErrorObjectParam",
     "WebSearchToolResultBlock",
     "WebSearchToolResultBlockParam",
-    "WebSearchToolResultError",
+    "WebSearchToolResultErrorObject",
 ]

@@ -45,10 +45,10 @@ class BashCodeExecutionResultBlock(BaseAPITypeExtra):
     type: Annotated[Literal["bash_code_execution_result"], Field(title="Type")]
 
 
-class BashCodeExecutionToolResultError(BaseAPITypeExtra):
-    """`BashCodeExecutionToolResultError`."""
+class BashCodeExecutionToolResultErrorObject(BaseAPITypeExtra):
+    """`BashCodeExecutionToolResultErrorObject`."""
 
-    __upstream_schema__ = "BashCodeExecutionToolResultError"
+    __upstream_schema__ = "BashCodeExecutionToolResultErrorObject"
     error_code: Annotated[str, Field(title="Error Code")]
     type: Annotated[
         Literal["bash_code_execution_tool_result_error"], Field(title="Type")
@@ -101,10 +101,10 @@ class CodeExecutionResultBlock(BaseAPITypeExtra):
     type: Annotated[Literal["code_execution_result"], Field(title="Type")]
 
 
-class CodeExecutionToolResultError(BaseAPITypeExtra):
-    """`CodeExecutionToolResultError` from the Anthropic Messages API."""
+class CodeExecutionToolResultErrorObject(BaseAPITypeExtra):
+    """`CodeExecutionToolResultErrorObject`."""
 
-    __upstream_schema__ = "CodeExecutionToolResultError"
+    __upstream_schema__ = "CodeExecutionToolResultErrorObject"
     error_code: Annotated[str, Field(title="Error Code")]
     type: Annotated[
         Literal["code_execution_tool_result_error"], Field(title="Type")
@@ -224,10 +224,10 @@ class TextEditorCodeExecutionStrReplaceResultBlock(BaseAPITypeExtra):
     ]
 
 
-class TextEditorCodeExecutionToolResultError(BaseAPITypeExtra):
-    """`TextEditorCodeExecutionToolResultError`."""
+class TextEditorCodeExecutionToolResultErrorObject(BaseAPITypeExtra):
+    """`TextEditorCodeExecutionToolResultErrorObject`."""
 
-    __upstream_schema__ = "TextEditorCodeExecutionToolResultError"
+    __upstream_schema__ = "TextEditorCodeExecutionToolResultErrorObject"
     error_code: Annotated[str, Field(title="Error Code")]
     error_message: Annotated[str | None, Field(title="Error Message")] = None
     type: Annotated[
@@ -258,10 +258,10 @@ class ToolReferenceBlock(BaseAPITypeExtra):
     type: Annotated[Literal["tool_reference"], Field(title="Type")]
 
 
-class ToolSearchToolResultError(BaseAPITypeExtra):
-    """`ToolSearchToolResultError` from the Anthropic Messages API."""
+class ToolSearchToolResultErrorObject(BaseAPITypeExtra):
+    """`ToolSearchToolResultErrorObject`."""
 
-    __upstream_schema__ = "ToolSearchToolResultError"
+    __upstream_schema__ = "ToolSearchToolResultErrorObject"
     error_code: Annotated[str, Field(title="Error Code")]
     error_message: Annotated[str | None, Field(title="Error Message")] = None
     type: Annotated[
@@ -332,10 +332,10 @@ class WebSearchResultBlock(BaseAPITypeExtra):
     url: Annotated[str, Field(title="Url")]
 
 
-class WebSearchToolResultError(BaseAPITypeExtra):
-    """`WebSearchToolResultError` from the Anthropic Messages API."""
+class WebSearchToolResultErrorObject(BaseAPITypeExtra):
+    """`WebSearchToolResultErrorObject` from the Anthropic Messages API."""
 
-    __upstream_schema__ = "WebSearchToolResultError"
+    __upstream_schema__ = "WebSearchToolResultErrorObject"
     error_code: Annotated[str, Field(title="Error Code")]
     type: Annotated[
         Literal["web_search_tool_result_error"], Field(title="Type")
@@ -348,7 +348,7 @@ class BashCodeExecutionToolResultBlock(BaseAPITypeExtra):
     __upstream_schema__ = "BashCodeExecutionToolResultBlock"
     content: Annotated[
         Annotated[
-            Annotated[BashCodeExecutionToolResultError, Tag("0")]
+            Annotated[BashCodeExecutionToolResultErrorObject, Tag("0")]
             | Annotated[BashCodeExecutionResultBlock, Tag("1")]
             | Annotated[UnknownVariant, Tag(UNKNOWN)],
             Discriminator(
@@ -380,7 +380,7 @@ class CodeExecutionToolResultBlock(BaseAPITypeExtra):
     __upstream_schema__ = "CodeExecutionToolResultBlock"
     content: Annotated[
         Annotated[
-            Annotated[CodeExecutionToolResultError, Tag("0")]
+            Annotated[CodeExecutionToolResultErrorObject, Tag("0")]
             | Annotated[CodeExecutionResultBlock, Tag("1")]
             | Annotated[EncryptedCodeExecutionResultBlock, Tag("2")]
             | Annotated[UnknownVariant, Tag(UNKNOWN)],
@@ -424,7 +424,7 @@ class TextEditorCodeExecutionToolResultBlock(BaseAPITypeExtra):
     __upstream_schema__ = "TextEditorCodeExecutionToolResultBlock"
     content: Annotated[
         Annotated[
-            Annotated[TextEditorCodeExecutionToolResultError, Tag("0")]
+            Annotated[TextEditorCodeExecutionToolResultErrorObject, Tag("0")]
             | Annotated[TextEditorCodeExecutionViewResultBlock, Tag("1")]
             | Annotated[TextEditorCodeExecutionCreateResultBlock, Tag("2")]
             | Annotated[TextEditorCodeExecutionStrReplaceResultBlock, Tag("3")]
@@ -454,7 +454,7 @@ class ToolSearchToolResultBlock(BaseAPITypeExtra):
     __upstream_schema__ = "ToolSearchToolResultBlock"
     content: Annotated[
         Annotated[
-            Annotated[ToolSearchToolResultError, Tag("0")]
+            Annotated[ToolSearchToolResultErrorObject, Tag("0")]
             | Annotated[ToolSearchToolSearchResultBlock, Tag("1")]
             | Annotated[UnknownVariant, Tag(UNKNOWN)],
             Discriminator(
@@ -549,7 +549,7 @@ class WebSearchToolResultBlock(BaseAPITypeExtra):
         Field(title="Caller"),
     ] = None
     content: Annotated[
-        WebSearchToolResultError | list[WebSearchResultBlock],
+        WebSearchToolResultErrorObject | list[WebSearchResultBlock],
         Field(title="Content"),
     ]
     tool_use_id: Annotated[str, Field(title="Tool Use Id")]
@@ -559,12 +559,12 @@ class WebSearchToolResultBlock(BaseAPITypeExtra):
 Base64PDFSource.model_rebuild()
 BashCodeExecutionOutputBlock.model_rebuild()
 BashCodeExecutionResultBlock.model_rebuild()
-BashCodeExecutionToolResultError.model_rebuild()
+BashCodeExecutionToolResultErrorObject.model_rebuild()
 CacheMissToolsChanged.model_rebuild()
 CitationsConfig.model_rebuild()
 CodeExecutionOutputBlock.model_rebuild()
 CodeExecutionResultBlock.model_rebuild()
-CodeExecutionToolResultError.model_rebuild()
+CodeExecutionToolResultErrorObject.model_rebuild()
 DirectCaller.model_rebuild()
 EncryptedCodeExecutionResultBlock.model_rebuild()
 PlainTextSource.model_rebuild()
@@ -573,15 +573,15 @@ ServerToolCaller20260120.model_rebuild()
 ServerToolUseBlock.model_rebuild()
 TextEditorCodeExecutionCreateResultBlock.model_rebuild()
 TextEditorCodeExecutionStrReplaceResultBlock.model_rebuild()
-TextEditorCodeExecutionToolResultError.model_rebuild()
+TextEditorCodeExecutionToolResultErrorObject.model_rebuild()
 TextEditorCodeExecutionViewResultBlock.model_rebuild()
 ToolReferenceBlock.model_rebuild()
-ToolSearchToolResultError.model_rebuild()
+ToolSearchToolResultErrorObject.model_rebuild()
 ToolSearchToolSearchResultBlock.model_rebuild()
 ToolUseBlock.model_rebuild()
 WebFetchToolResultErrorBlock.model_rebuild()
 WebSearchResultBlock.model_rebuild()
-WebSearchToolResultError.model_rebuild()
+WebSearchToolResultErrorObject.model_rebuild()
 BashCodeExecutionToolResultBlock.model_rebuild()
 CodeExecutionToolResultBlock.model_rebuild()
 DocumentBlock.model_rebuild()
@@ -595,13 +595,13 @@ __all__ = [
     "BashCodeExecutionOutputBlock",
     "BashCodeExecutionResultBlock",
     "BashCodeExecutionToolResultBlock",
-    "BashCodeExecutionToolResultError",
+    "BashCodeExecutionToolResultErrorObject",
     "CacheMissToolsChanged",
     "CitationsConfig",
     "CodeExecutionOutputBlock",
     "CodeExecutionResultBlock",
     "CodeExecutionToolResultBlock",
-    "CodeExecutionToolResultError",
+    "CodeExecutionToolResultErrorObject",
     "DirectCaller",
     "DocumentBlock",
     "EncryptedCodeExecutionResultBlock",
@@ -612,11 +612,11 @@ __all__ = [
     "TextEditorCodeExecutionCreateResultBlock",
     "TextEditorCodeExecutionStrReplaceResultBlock",
     "TextEditorCodeExecutionToolResultBlock",
-    "TextEditorCodeExecutionToolResultError",
+    "TextEditorCodeExecutionToolResultErrorObject",
     "TextEditorCodeExecutionViewResultBlock",
     "ToolReferenceBlock",
     "ToolSearchToolResultBlock",
-    "ToolSearchToolResultError",
+    "ToolSearchToolResultErrorObject",
     "ToolSearchToolSearchResultBlock",
     "ToolUseBlock",
     "WebFetchBlock",
@@ -624,5 +624,5 @@ __all__ = [
     "WebFetchToolResultErrorBlock",
     "WebSearchResultBlock",
     "WebSearchToolResultBlock",
-    "WebSearchToolResultError",
+    "WebSearchToolResultErrorObject",
 ]
