@@ -1,0 +1,50 @@
+{
+ "endpoints": {
+  "messages": {
+   "sdk": {
+    "package": "anthropic",
+    "version": "2.12.0",
+    "api_version": "2026-10-21"
+   },
+   "request": {
+    "type": "anthropic.resources.messages.messages:Messages.create",
+    "transformation": "pydantic.TypeAdapter.json_schema(validation)"
+   },
+   "response": {
+    "type": "anthropic.types:Message"
+   },
+   "stream": {
+    "type": "anthropic.types:RawMessageStreamEvent"
+   },
+   "responses": 3,
+   "events": 51,
+   "rejected": []
+  },
+  "files": {
+   "operations": [
+    "createFile",
+    "listFiles",
+    "retrieveFile",
+    "deleteFile",
+    "downloadFile"
+   ],
+   "openapi": {
+    "file": "anthropic-files.openapi.json",
+    "sha256": "0348c53a8e56250c6ebdb119a534d4395c62cf2e3b8b2ce1b8e02c2bc98c8a2a",
+    "openapi": "3.1.0",
+    "version": "2026-10-21",
+    "sources": [
+     "https://platform.claude.com/docs/en/api/files/upload",
+     "https://platform.claude.com/docs/en/api/files/list",
+     "https://platform.claude.com/docs/en/api/files/retrieve_metadata",
+     "https://platform.claude.com/docs/en/api/files/download",
+     "https://platform.claude.com/docs/en/api/files/delete",
+     "https://platform.claude.com/docs/en/build-with-claude/files"
+    ],
+    "retrieved": "2026-11-19"
+   },
+   "responses": 3,
+   "rejected": []
+  }
+ }
+}
