@@ -49,7 +49,7 @@ classifiers = [
 # core a change that needs its unreleased code pins a commit instead
 # (CONTRIBUTING.md, "A change in the core and here").
 dependencies = [
-    "aiollm-core>=0.15,<0.16",
+    "aiollm-core>=0.16,<0.17",
     "pydantic>=2.14.1",
 ]
 
@@ -93,7 +93,7 @@ upstream = [
     "anthropic==2.12.0",
 ]
 test = [
-    "aiollm-core[testing]>=0.15,<0.16",
+    "aiollm-core[testing]>=0.16,<0.17",
     "pytest-cov>=7.1.0",
     "pytest-html>=4.2.0",
     "pytest-mypy>=1.1.0",

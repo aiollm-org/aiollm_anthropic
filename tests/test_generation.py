@@ -255,7 +255,7 @@ async def test_stream_stopped_by_tool_use_finishes() -> None:
         ("max_tokens", IncompleteReason.MAX_TOKENS),
         ("refusal", IncompleteReason.REFUSAL),
         ("model_context_window_exceeded", IncompleteReason.OTHER),
-        ("pause_turn", IncompleteReason.OTHER),
+        ("pause_turn", IncompleteReason.PAUSED),
         ("new_reason", IncompleteReason.OTHER),
     ],
 )

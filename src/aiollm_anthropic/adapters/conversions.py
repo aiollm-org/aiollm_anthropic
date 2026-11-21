@@ -6,13 +6,19 @@ import base64
 import json
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
-from typing import Any, Final
+from typing import Any, Final, cast
 
 from pydantic import MISSING, BaseModel
 
 from aiollm.adapters.base import BaseConversion
 from aiollm.adapters.stop import Stop
-from aiollm.enums import IncompleteReason, Role
+from aiollm.enums import (
+    CitationKind,
+    IncompleteReason,
+    Role,
+    ServerToolKind,
+    ServerToolStatus,
+)
 from aiollm.http.exceptions.response import APIResponseError
 from aiollm.types.requests.content import (
     ContentPart,
@@ -28,6 +34,7 @@ from aiollm.types.requests.generation import (
     ToolResult,
     Turn,
 )
+from aiollm.types.responses.builtin import Citation, ServerToolCall
 from aiollm.types.responses.generation import TokenUsage
 
 from aiollm_anthropic.api import PROVIDER
@@ -36,6 +43,7 @@ from aiollm_anthropic.types import (
     Message,
     RawMessageDeltaEvent,
     RawMessageStartEvent,
+    ServerToolUseBlock,
     TextBlock,
     ThinkingBlock,
     ToolUseBlock,
@@ -54,6 +62,7 @@ OpenAI response with function calls is ``completed``. Any other reason
 INCOMPLETE_REASONS: Final[Mapping[str, IncompleteReason]] = {
     "max_tokens": IncompleteReason.MAX_TOKENS,
     "refusal": IncompleteReason.REFUSAL,
+    "pause_turn": IncompleteReason.PAUSED,
 }
 """Shared reason of each early stop reason that has one.
 
@@ -70,7 +79,11 @@ class InputConversion(
     """Converts the shared ``input`` into ``messages``.
 
     A text becomes one ``user`` turn, and so does a text turn of a list.
-    A turn of calls becomes an ``assistant`` message: its Anthropic
+    An ``assistant`` turn with Anthropic's own content (``native``: a
+    response that used built-in tools, or paused) is sent as that
+    content, which holds the encrypted search results Anthropic needs
+    back; another provider's ``native`` is not read and the turn's text
+    is sent. A turn of calls becomes an ``assistant`` message: its Anthropic
     content blocks when it has them (``native``, thinking with it), else
     a ``text`` block and a ``tool_use`` block per call. The tool results
     after it become one ``user`` message of ``tool_result`` blocks, and a
@@ -112,6 +125,15 @@ class InputConversion(
                     continue
                 case Turn(role=Role.USER) if results is not None:
                     results += _blocks(item.content)
+                case Turn(native=NativeOutput() as native) if (
+                    item.role is Role.ASSISTANT and native.provider == PROVIDER
+                ):
+                    messages.append(
+                        {
+                            "role": Role.ASSISTANT.value,
+                            "content": [dict(b) for b in native.items],
+                        }
+                    )
                 case Turn(content=str()):
                     messages.append(
                         {"role": item.role.value, "content": item.content}
@@ -331,6 +353,21 @@ def message_tool_calls(message: Message) -> list[ToolCall]:
     ]
 
 
+def message_blocks(message: Message) -> list[dict[str, Any]]:
+    """Dump a message's content blocks as Anthropic sent them.
+
+    Args:
+        message: A message.
+
+    Returns:
+        Each block with only the fields Anthropic sent.
+    """
+    return [
+        block.model_dump(mode="json", by_alias=True, exclude_unset=True)
+        for block in message.content
+    ]
+
+
 def message_native(message: Message) -> NativeOutput | None:
     """Keep a message's content as Anthropic's next request takes it.
 
@@ -339,14 +376,207 @@ def message_native(message: Message) -> NativeOutput | None:
 
     Returns:
         Its content blocks with only the fields Anthropic sent (thinking
-        with its ``signature``, text, ``tool_use``), which an
-        ``assistant`` message takes back; ``None`` without content.
+        with its ``signature``, text, ``tool_use``, the calls and results
+        of built-in tools), which an ``assistant`` message takes back;
+        ``None`` without content.
     """
-    blocks = [
-        block.model_dump(mode="json", by_alias=True, exclude_unset=True)
-        for block in message.content
-    ]
+    blocks = message_blocks(message)
     return NativeOutput(provider=PROVIDER, items=blocks) if blocks else None
+
+
+SERVER_TOOL_KINDS: Final[Mapping[str, ServerToolKind]] = {
+    "web_search": ServerToolKind.WEB_SEARCH,
+    "web_fetch": ServerToolKind.WEB_FETCH,
+    "code_execution": ServerToolKind.CODE_EXECUTION,
+    "bash_code_execution": ServerToolKind.CODE_EXECUTION,
+    "text_editor_code_execution": ServerToolKind.CODE_EXECUTION,
+}
+"""Shared kind of each built-in tool Anthropic names in ``server_tool_use``.
+
+Any other name (the tool search tools, one Anthropic adds later) is
+``ServerToolKind.OTHER``.
+"""
+
+CODE_INPUTS: Final[Mapping[str, str]] = {
+    "code_execution": "code",
+    "bash_code_execution": "command",
+}
+"""The ``input`` field that holds what a code execution runs, by tool."""
+
+RESULT_SUFFIX: Final = "_tool_result"
+"""Ends the ``type`` of every block that holds a built-in tool's result."""
+
+ERROR_SUFFIX: Final = "_tool_result_error"
+"""Ends the ``type`` of a result's ``content`` that tells a failure."""
+
+DOCUMENT_LOCATIONS: Final = frozenset(
+    {"char_location", "page_location", "content_block_location"}
+)
+"""Citation types that point into a document the request sent."""
+
+
+def server_tool_calls(
+    blocks: Sequence[Mapping[str, Any]],
+) -> list[ServerToolCall]:
+    """Collect the built-in tool calls of content blocks.
+
+    A call is a ``server_tool_use`` block and, after it, the result block
+    that names its id in ``tool_use_id``.
+
+    Args:
+        blocks: The content blocks of a message, as Anthropic sent them.
+
+    Returns:
+        A call per ``server_tool_use`` block, in order. It is
+        ``COMPLETED`` once its result came, ``FAILED`` (with the result's
+        ``error_code``) when the result is an error, and ``INCOMPLETE``
+        without a result, such as a paused or cut off message. ``raw``
+        holds the call block and its result block.
+    """
+    results = {
+        block["tool_use_id"]: block
+        for block in blocks
+        if str(block.get("type", "")).endswith(RESULT_SUFFIX)
+        and "tool_use_id" in block
+    }
+    return [
+        _server_call(dict(block), results.get(block["id"]))
+        for block in blocks
+        if block.get("type") == "server_tool_use"
+    ]
+
+
+def _server_call(
+    block: dict[str, Any], result: Mapping[str, Any] | None
+) -> ServerToolCall:
+    """Build the call of a ``server_tool_use`` block and its result.
+
+    Args:
+        block: The ``server_tool_use`` block.
+        result: The block with its result, if it came.
+
+    Returns:
+        The shared call.
+    """
+    name = str(block.get("name", ""))
+    arguments = block.get("input")
+    arguments = arguments if isinstance(arguments, dict) else {}
+    status = ServerToolStatus.INCOMPLETE
+    error = None
+    if result is not None:
+        content = result.get("content")
+        failed = isinstance(content, dict) and str(
+            content.get("type", "")
+        ).endswith(ERROR_SUFFIX)
+        status = (
+            ServerToolStatus.FAILED if failed else ServerToolStatus.COMPLETED
+        )
+        if failed and isinstance(content, dict):
+            error = str(content.get("error_code") or content["type"])
+    query = arguments.get("query")
+    field = CODE_INPUTS.get(name)
+    code = arguments.get(field) if field else None
+    return ServerToolCall(
+        id=block["id"],
+        kind=SERVER_TOOL_KINDS.get(name, ServerToolKind.OTHER),
+        status=status,
+        queries=[query]
+        if name == "web_search" and isinstance(query, str)
+        else [],
+        code=code if isinstance(code, str) else None,
+        error=error,
+        raw=[block] if result is None else [block, dict(result)],
+    )
+
+
+def block_citations(blocks: Sequence[Mapping[str, Any]]) -> list[Citation]:
+    """Collect the citations of the text blocks.
+
+    Anthropic attaches a citation to the whole ``text`` block, so
+    ``start_index`` and ``end_index`` are where that block sits in the
+    joined text of the message. A page of a web search is a ``URL``
+    citation, a part of a stored file a ``FILE`` one; a part of a
+    document that came inline, or of search results the request sent,
+    has no stable source and stays in ``raw`` and ``native``.
+
+    Args:
+        blocks: The content blocks of a message, as Anthropic sent them.
+
+    Returns:
+        The citations, in order.
+    """
+    citations: list[Citation] = []
+    offset = 0
+    for block in blocks:
+        if block.get("type") != "text":
+            continue
+        text = str(block.get("text", ""))
+        start, offset = offset, offset + len(text)
+        for item in block.get("citations") or []:
+            citation = _citation(item, start, offset)
+            if citation is not None:
+                citations.append(citation)
+    return citations
+
+
+def _citation(
+    item: Mapping[str, Any], start: int, end: int
+) -> Citation | None:
+    """Turn a citation of a text block into a shared one.
+
+    Args:
+        item: The citation as Anthropic sent it.
+        start: Where its text block starts in the message's text.
+        end: Where its text block ends.
+
+    Returns:
+        The shared citation, or ``None`` for a source with no stable
+        identity.
+    """
+    kind = item.get("type")
+    if kind == "web_search_result_location":
+        return Citation(
+            kind=CitationKind.URL,
+            url=item.get("url"),
+            title=item.get("title"),
+            cited_text=item.get("cited_text"),
+            start_index=start,
+            end_index=end,
+        )
+    if kind in DOCUMENT_LOCATIONS and item.get("file_id"):
+        return Citation(
+            kind=CitationKind.FILE,
+            title=item.get("document_title"),
+            file_id=item["file_id"],
+            cited_text=item.get("cited_text"),
+            start_index=start,
+            end_index=end,
+        )
+    return None
+
+
+def message_server_calls(message: Message) -> list[ServerToolCall]:
+    """Collect the built-in tool calls of a message.
+
+    Args:
+        message: A message.
+
+    Returns:
+        Its calls, as ``server_tool_calls`` gives them; empty without.
+    """
+    return server_tool_calls(message_blocks(message))
+
+
+def message_citations(message: Message) -> list[Citation]:
+    """Collect the citations of a message.
+
+    Args:
+        message: A message.
+
+    Returns:
+        Its citations, as ``block_citations`` gives them; empty without.
+    """
+    return block_citations(message_blocks(message))
 
 
 def message_thinking(message: Message) -> str | None:
@@ -389,7 +619,9 @@ class StreamState:
     whole text. It also keeps every content block, from its
     ``content_block_start`` and its deltas, to give the message's
     content back as ``native`` (thinking with its ``signature`` among
-    it) and each tool call once its block stops.
+    it, the citations of its text, the calls and results of built-in
+    tools) and each tool call once its block stops, and each built-in
+    tool call when it starts and when its result comes.
 
     Attributes:
         delta: The stop reason and details sent so far.
@@ -410,6 +642,11 @@ class StreamState:
     )
     _pieces: dict[int, dict[str, list[str]]] = field(
         default_factory=dict[int, dict[str, list[str]]],
+        init=False,
+        repr=False,
+    )
+    _servers: dict[int, ServerToolUseBlock] = field(
+        default_factory=dict[int, ServerToolUseBlock],
         init=False,
         repr=False,
     )
@@ -445,6 +682,9 @@ class StreamState:
         if isinstance(block, ToolUseBlock):
             self._calls[index] = block
             self._arguments[index] = []
+        elif isinstance(block, ServerToolUseBlock):
+            self._servers[index] = block
+            self._arguments[index] = []
 
     def add_piece(self, index: int, key: str, piece: str) -> None:
         """Keep a piece of a block's text, thinking or signature.
@@ -465,6 +705,65 @@ class StreamState:
             self._blocks[index] = {"type": kind}
             self._pieces[index] = {}
         self._pieces[index].setdefault(key, []).append(piece)
+
+    def add_citation(self, index: int, citation: BaseModel) -> None:
+        """Keep a citation of a text block.
+
+        A text block whose ``content_block_start`` did not come is
+        opened from the citation, as ``add_piece`` does.
+
+        Args:
+            index: The text block's index.
+            citation: The citation of a ``citations_delta``.
+        """
+        if index not in self._pieces:
+            self._blocks[index] = {"type": "text"}
+            self._pieces[index] = {}
+        block = self._blocks[index]
+        block["citations"] = [
+            *(block.get("citations") or []),
+            citation.model_dump(
+                mode="json", by_alias=True, exclude_unset=True
+            ),
+        ]
+
+    def server_started(self, index: int) -> ServerToolCall:
+        """Give the built-in tool call that a block starts.
+
+        Args:
+            index: The index of a ``server_tool_use`` block that just
+                started.
+
+        Returns:
+            The call as it is known at ``content_block_start``, its
+            input not streamed yet and its status ``IN_PROGRESS``.
+        """
+        [call] = server_tool_calls([self._blocks[index]])
+        return call.model_copy(update={"status": ServerToolStatus.IN_PROGRESS})
+
+    def server_done(self, index: int) -> ServerToolCall | None:
+        """Give the built-in tool call that a result block finishes.
+
+        Args:
+            index: The index of the block that just started.
+
+        Returns:
+            The whole call, its input from the pieces streamed for it,
+            when the block is the result of a ``server_tool_use`` block;
+            ``None`` for any other block.
+
+        Raises:
+            APIResponseError: The call's input pieces do not join into a
+                JSON object.
+        """
+        result = self._blocks[index]
+        if not str(result.get("type", "")).endswith(RESULT_SUFFIX):
+            return None
+        for opened, block in self._servers.items():
+            if block.id == result.get("tool_use_id"):
+                [call] = server_tool_calls([self._finished(opened), result])
+                return call
+        return None
 
     def call(self, index: int) -> ToolCall | None:
         """Give the tool call of a block, once its block stops.
@@ -511,17 +810,34 @@ class StreamState:
         """
         if not self._blocks:
             return None
-        blocks: list[dict[str, Any]] = []
-        for index in sorted(self._blocks):
-            block = dict(self._blocks[index])
-            for key, pieces in self._pieces[index].items():
-                block[key] = block.get(key, "") + "".join(pieces)
-            if index in self._calls:
-                block["input"] = _input(self._call(index))
-            blocks.append(block)
+        blocks = [self._finished(index) for index in sorted(self._blocks)]
         return NativeOutput(provider=PROVIDER, items=blocks)
 
-    def add_arguments(self, index: int, partial: str) -> str:
+    def _finished(self, index: int) -> dict[str, Any]:
+        """Join a block's pieces into it.
+
+        Args:
+            index: The block's index.
+
+        Returns:
+            The block as it started, with its text, thinking and
+            signature pieces joined into it, and the ``input`` of a call
+            parsed from its pieces.
+
+        Raises:
+            APIResponseError: A call's pieces do not join into a JSON
+                object.
+        """
+        block = dict(self._blocks[index])
+        for key, pieces in self._pieces[index].items():
+            block[key] = block.get(key, "") + "".join(pieces)
+        if index in self._calls:
+            block["input"] = _input(self._call(index))
+        elif self._arguments.get(index):
+            block["input"] = _object("".join(self._arguments[index]))
+        return block
+
+    def add_arguments(self, index: int, partial: str) -> str | None:
         """Keep a piece of a call's arguments.
 
         Args:
@@ -529,10 +845,12 @@ class StreamState:
             partial: The ``partial_json`` of an ``input_json_delta``.
 
         Returns:
-            The id of the call the piece belongs to.
+            The id of the call the piece belongs to; ``None`` for a piece
+            of a built-in tool's input, which is no call of yours.
 
         Raises:
-            APIResponseError: No ``tool_use`` block opened at the index.
+            APIResponseError: No ``tool_use`` or ``server_tool_use``
+                block opened at the index.
         """
         if index not in self._arguments:
             message = (
@@ -541,7 +859,7 @@ class StreamState:
             )
             raise APIResponseError(message)
         self._arguments[index].append(partial)
-        return self._calls[index].id
+        return self._calls[index].id if index in self._calls else None
 
     def tool_calls(self) -> list[ToolCall]:
         """Give the tool calls streamed so far.
@@ -643,6 +961,29 @@ def _input(call: ToolCall) -> dict[str, Any]:
         return call.parse_arguments()
     except ValueError as error:
         raise APIResponseError(str(error)) from error
+
+
+def _object(text: str) -> dict[str, Any]:
+    """Parse the joined pieces of a built-in tool's input.
+
+    Args:
+        text: The pieces joined; blank when Anthropic sent only empty
+            ones, as it does for an input with no field.
+
+    Returns:
+        The input as an object.
+
+    Raises:
+        APIResponseError: The text is not a JSON object.
+    """
+    try:
+        value = json.loads(text) if text.strip() else {}
+    except ValueError as error:
+        raise APIResponseError(str(error)) from error
+    if not isinstance(value, dict):
+        message = "Anthropic stream sent a tool input that is no JSON object"
+        raise APIResponseError(message)
+    return cast(dict[str, Any], value)
 
 
 def _sent(model: BaseModel) -> dict[str, object]:

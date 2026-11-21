@@ -6,18 +6,24 @@ import copy
 from collections.abc import AsyncGenerator, AsyncIterator, Mapping, Sequence
 from typing import TYPE_CHECKING, Any, Final, Self
 
-from pydantic import MISSING
+from pydantic import MISSING, BaseModel
 
 from aiollm.adapters.base import BaseCompositeAdapter
 from aiollm.adapters.validation import (
+    check_builtin_tools,
     check_conversation,
     check_files,
     checked_options,
     merge_options,
     request_errors,
 )
-from aiollm.enums import ToolChoice
+from aiollm.enums import ServerToolPhase, ToolChoice
 from aiollm.exceptions import RequestValidationError
+from aiollm.types.requests.builtin import (
+    BuiltinTool,
+    CodeExecution,
+    WebSearch,
+)
 from aiollm.types.requests.generation import (
     ForcedTool,
     GenerationRequest,
@@ -30,6 +36,7 @@ from aiollm.types.responses.events import (
     GenerationEvent,
     OtherEvent,
     ReasoningDeltaEvent,
+    ServerToolCallEvent,
     TextDeltaEvent,
     ToolCallDeltaEvent,
     ToolCallDoneEvent,
@@ -42,10 +49,14 @@ from aiollm_anthropic.adapters.conversions import (
     STOP_CONVERSION,
     USAGE_CONVERSION,
     StreamState,
+    block_citations,
+    message_citations,
     message_native,
+    message_server_calls,
     message_text,
     message_thinking,
     message_tool_calls,
+    server_tool_calls,
 )
 from aiollm_anthropic.api import PROVIDER
 from aiollm_anthropic.methods.messages import (
@@ -53,6 +64,7 @@ from aiollm_anthropic.methods.messages import (
     StreamMessage,
 )
 from aiollm_anthropic.types import (
+    CitationsDelta,
     InputJSONDelta,
     Message,
     MessageStreamEvent,
@@ -62,6 +74,7 @@ from aiollm_anthropic.types import (
     RawMessageDeltaEvent,
     RawMessageStartEvent,
     RawMessageStopEvent,
+    ServerToolUseBlock,
     SignatureDelta,
     TextDelta,
     ThinkingDelta,
@@ -214,9 +227,12 @@ class AnthropicGenerationAdapter(
             request: The request it answers.
 
         Returns:
-            The generated text with its token counts; a message stopped
+            The generated text with its token counts, the calls of the
+            built-in tools Anthropic ran (``server_tool_calls``) and the
+            sources its text cites (``citations``); a message stopped
             early, by ``max_tokens`` for example, keeps its text and gets
-            ``incomplete_reason``, and a refusal gets ``refusal``.
+            ``incomplete_reason`` (``PAUSED`` for ``pause_turn``), and a
+            refusal gets ``refusal``.
 
         Raises:
             APIResponseError: The message has no stop reason.
@@ -233,6 +249,8 @@ class AnthropicGenerationAdapter(
             refusal=stop.refusal,
             reasoning=message_thinking(raw),
             tool_calls=message_tool_calls(raw),
+            server_tool_calls=message_server_calls(raw),
+            citations=message_citations(raw),
             native=message_native(raw),
             raw=raw,
         )
@@ -264,10 +282,14 @@ class AnthropicGenerationAdapter(
         deltas ``ReasoningDeltaEvent``; a ``tool_use`` block becomes
         ``ToolCallStartEvent``, a ``ToolCallDeltaEvent`` per
         ``input_json_delta`` and ``ToolCallDoneEvent`` at its
-        ``content_block_stop``; ``message_stop`` becomes
+        ``content_block_stop``; a built-in tool's ``server_tool_use``
+        block becomes a ``ServerToolCallEvent`` that starts the call and
+        its result block one that ends it; ``message_stop`` becomes
         ``CompletedEvent`` with the counts and stop reason collected from
-        ``message_start`` and ``message_delta`` and the content as
-        ``native``; every other event is an ``OtherEvent``.
+        ``message_start`` and ``message_delta``, the built-in tool calls
+        and citations, and the content as ``native``; every other event
+        (the pieces of a built-in tool's input, citations) is an
+        ``OtherEvent``.
 
         Args:
             items: The events Anthropic sent.
@@ -279,7 +301,8 @@ class AnthropicGenerationAdapter(
         Raises:
             APIResponseError: ``message_stop`` came without a stop
                 reason or without ``message_start``, or arguments came
-                for a block no ``tool_use`` opened. The stream's end is
+                for a block no ``tool_use`` or ``server_tool_use``
+                opened. The stream's end is
                 checked by ``StreamMessage`` and by the use case.
         """
         state = StreamState()
@@ -296,6 +319,8 @@ class AnthropicGenerationAdapter(
                 case RawMessageStopEvent():
                     stop = self.stop_conversion(state.delta)
                     message = state.message()
+                    native = state.native()
+                    blocks = [] if native is None else native.items
                     yield CompletedEvent[MessageStreamEvent](
                         id=message.id,
                         provider=self.provider,
@@ -307,7 +332,9 @@ class AnthropicGenerationAdapter(
                         refusal=stop.refusal,
                         reasoning=state.thinking(),
                         tool_calls=state.tool_calls(),
-                        native=state.native(),
+                        server_tool_calls=server_tool_calls(blocks),
+                        citations=block_citations(blocks),
+                        native=native,
                         raw=item,
                     )
                     continue
@@ -328,12 +355,14 @@ class AnthropicGenerationAdapter(
         Raises:
             RequestValidationError: The conversation is out of order (see
                 ``check_conversation``), a part names another provider's
-                file, or a call of a turn without Anthropic's own content
-                has arguments that are not a JSON object, which
-                ``tool_use.input`` must be.
+                file, a built-in tool is one Anthropic does not run (see
+                ``check_builtin_tools``), or a call of a turn without
+                Anthropic's own content has arguments that are not a
+                JSON object, which ``tool_use.input`` must be.
         """
         check_conversation(request, self.provider)
         check_files(request, self.provider)
+        check_builtin_tools(request, self.provider, (WebSearch, CodeExecution))
         _check_arguments(request)
         fields = {
             "model": request.model,
@@ -350,11 +379,7 @@ class AnthropicGenerationAdapter(
                 else {"user_id": request.end_user_id}
             ),
             "output_config": _output_config(request),
-            "tools": (
-                MISSING
-                if request.tools is MISSING
-                else [_tool(tool) for tool in request.tools]
-            ),
+            "tools": _tools(request),
             "tool_choice": _tool_choice(request),
         }
         return merge_options(fields, self.provider_options, self.provider)
@@ -373,20 +398,18 @@ def _block_event(
     Returns:
         The shared event of a text, thinking or tool call event; ``None``
         for an event that is no block event or has no shared
-        counterpart (a signature, an empty thinking delta, a block that
-        is no call starting or stopping), which becomes ``OtherEvent``.
+        counterpart (a signature, a citation, an empty thinking delta, the
+        input of a built-in tool, a block that is no call starting or
+        stopping), which becomes ``OtherEvent``.
 
     Raises:
         APIResponseError: Arguments came for a block that is no
-            ``tool_use``.
+            ``tool_use`` or ``server_tool_use``.
     """
     match item:
         case RawContentBlockStartEvent(content_block=block):
             state.start_block(item.index, block)
-            if isinstance(block, ToolUseBlock):
-                return ToolCallStartEvent[MessageStreamEvent](
-                    call_id=block.id, name=block.name, raw=item
-                )
+            return _start_event(state, item, block)
         case RawContentBlockDeltaEvent(delta=TextDelta() as delta):
             state.add_piece(item.index, "text", delta.text)
             state.add_text(delta.text)
@@ -404,18 +427,58 @@ def _block_event(
             state.add_piece(item.index, "signature", delta.signature)
         case RawContentBlockDeltaEvent(delta=InputJSONDelta() as delta):
             call_id = state.add_arguments(item.index, delta.partial_json)
-            return ToolCallDeltaEvent[MessageStreamEvent](
-                call_id=call_id, arguments=delta.partial_json, raw=item
-            )
+            if call_id is not None:
+                return ToolCallDeltaEvent[MessageStreamEvent](
+                    call_id=call_id, arguments=delta.partial_json, raw=item
+                )
+        case RawContentBlockDeltaEvent(delta=CitationsDelta() as delta):
+            state.add_citation(item.index, delta.citation)
         case RawContentBlockStopEvent():
             call = state.call(item.index)
-            if call is not None:
-                return ToolCallDoneEvent[MessageStreamEvent](
-                    call=call, raw=item
-                )
+            return (
+                None
+                if call is None
+                else ToolCallDoneEvent[MessageStreamEvent](call=call, raw=item)
+            )
         case _:
             pass
     return None
+
+
+def _start_event(
+    state: StreamState,
+    item: RawContentBlockStartEvent,
+    block: BaseModel,
+) -> GenerationEvent[MessageStreamEvent] | None:
+    """Convert the start of a block that is a call or a call's result.
+
+    Args:
+        state: The stream's state, which has the block.
+        item: The ``content_block_start`` event.
+        block: The block it starts.
+
+    Returns:
+        ``ToolCallStartEvent`` for a ``tool_use`` block, the
+        ``STARTED`` event of a built-in tool call for a
+        ``server_tool_use`` block and its ``DONE`` event for the block
+        with the call's result; ``None`` for any other block.
+    """
+    if isinstance(block, ToolUseBlock):
+        return ToolCallStartEvent[MessageStreamEvent](
+            call_id=block.id, name=block.name, raw=item
+        )
+    if isinstance(block, ServerToolUseBlock):
+        return ServerToolCallEvent[MessageStreamEvent](
+            phase=ServerToolPhase.STARTED,
+            call=state.server_started(item.index),
+            raw=item,
+        )
+    done = state.server_done(item.index)
+    if done is None:
+        return None
+    return ServerToolCallEvent[MessageStreamEvent](
+        phase=ServerToolPhase.DONE, call=done, raw=item
+    )
 
 
 def _check_arguments(request: GenerationRequest) -> None:
@@ -453,6 +516,74 @@ TOOL_CHOICES: Final[Mapping[ToolChoice, str]] = {
     ToolChoice.REQUIRED: "any",
 }
 """Anthropic's ``tool_choice`` ``type`` of each shared mode."""
+
+
+def _tools(request: GenerationRequest) -> list[dict[str, Any]] | MISSING:
+    """Build ``tools`` from the function and the built-in tools.
+
+    Args:
+        request: The shared request.
+
+    Returns:
+        The function tools, then the built-in ones, or ``MISSING``
+        without any.
+    """
+    functions = [] if request.tools is MISSING else request.tools
+    tools = [_tool(tool) for tool in functions]
+    tools += [_builtin_tool(tool) for tool in request.builtin_tools]
+    return tools or MISSING
+
+
+WEB_SEARCH_TYPE: Final = "web_search_20250305"
+"""The version of Anthropic's web search that ``WebSearch`` sends.
+
+The first one, which has no side effects on other tools (the newer
+ones filter the results with code execution); a newer version goes
+through ``aiollm_anthropic.tools.web_search``.
+"""
+
+CODE_EXECUTION_TYPE: Final = "code_execution_20250825"
+"""The version of Anthropic's code execution that ``CodeExecution`` sends.
+
+A newer version goes through ``aiollm_anthropic.tools.code_execution``.
+"""
+
+
+def _builtin_tool(tool: BuiltinTool) -> dict[str, Any]:
+    """Build Anthropic's tool from a shared built-in tool.
+
+    Args:
+        tool: The shared tool; ``check_builtin_tools`` has accepted it.
+
+    Returns:
+        ``WebSearch`` as a ``web_search_20250305`` tool with its
+        domains and its location as an ``approximate`` one,
+        ``CodeExecution`` as a ``code_execution_20250825`` tool, and a
+        ``ProviderTool`` (the only other kind) as its own definition.
+    """
+    match tool:
+        case WebSearch():
+            search: dict[str, Any] = {
+                "type": WEB_SEARCH_TYPE,
+                "name": "web_search",
+            }
+            if tool.allowed_domains is not MISSING:
+                search["allowed_domains"] = list(tool.allowed_domains)
+            location = tool.user_location
+            if location is not MISSING:
+                search["user_location"] = {
+                    "type": "approximate",
+                    **{
+                        name: getattr(location, name)
+                        for name in ("country", "region", "city", "timezone")
+                        if getattr(location, name) is not MISSING
+                    },
+                }
+            return search
+        case CodeExecution():
+            return {"type": CODE_EXECUTION_TYPE, "name": "code_execution"}
+        case _:
+            return copy.deepcopy(dict(tool.definition))
 
 
 def _tool(tool: Tool) -> dict[str, Any]:
