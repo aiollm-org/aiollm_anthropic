@@ -1,0 +1,1 @@
+**Breaking:** needs `aiollm-core` 0.17: `AnthropicFilesAdapter.to_download_method` takes the whole `ProviderFile`, as the core's `IFilesAdapter` now does, and refuses a file that names a container (`ProducedFile.container_id`) with `RequestValidationError`, since Anthropic serves no file from one.

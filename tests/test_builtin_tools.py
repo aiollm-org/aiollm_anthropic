@@ -25,7 +25,9 @@ from aiollm.http.exceptions.response import APIResponseError
 from aiollm.types.requests import (
     CodeExecution,
     GenerationRequest,
+    ProviderFile,
     ProviderTool,
+    TextPart,
     Turn,
     UserLocation,
     WebSearch,
@@ -38,7 +40,7 @@ from aiollm.types.responses import (
 )
 
 from aiollm_anthropic import tools
-from aiollm_anthropic.adapters.conversions import StreamState
+from aiollm_anthropic.adapters.conversions import StreamState, block_files
 from aiollm_anthropic.api import PROVIDER
 from aiollm_anthropic.methods import CreateMessage
 from aiollm_anthropic.methods.params import UserLocationParam
@@ -787,3 +789,70 @@ class TestInput:
             "role": "assistant",
             "content": [SEARCH_CALL],
         }
+
+
+class TestCodeFiles:
+    """The files a code execution reads, and the files it makes."""
+
+    stored = ProviderFile(provider=PROVIDER, id="file_in")
+
+    def test_files_go_into_the_last_user_message(self) -> None:
+        paused = adapter.to_response(
+            message(content=[SEARCH_CALL], stop_reason="pause_turn"),
+            REQUEST,
+        )
+        parts = [TextPart(text="Chart this")]
+
+        method = adapter.to_method(
+            request(
+                CodeExecution(files=[self.stored]),
+                input=[Turn.user(parts), paused.to_turn()],
+            )
+        )
+
+        assert method.get_body_map()["messages"][0] == {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "Chart this"},
+                {"type": "container_upload", "file_id": "file_in"},
+            ],
+        }
+
+    def test_files_without_a_user_message_are_refused(self) -> None:
+        paused = adapter.to_response(
+            message(content=[SEARCH_CALL], stop_reason="pause_turn"),
+            REQUEST,
+        )
+
+        with pytest.raises(RequestValidationError) as caught:
+            adapter.to_method(
+                request(
+                    CodeExecution(files=[self.stored]),
+                    input=[paused.to_turn()],
+                )
+            )
+
+        assert caught.value.field == "tools"
+
+    def test_only_outputs_with_a_file_are_files(self) -> None:
+        result = {
+            "type": "bash_code_execution_tool_result",
+            "tool_use_id": "srvtoolu_1",
+            "content": {
+                "type": "bash_code_execution_result",
+                "stdout": "",
+                "stderr": "",
+                "return_code": 0,
+                "content": [
+                    {"type": "bash_code_execution_output", "file_id": "f1"},
+                    {"type": "something_else", "file_id": "f2"},
+                ],
+            },
+        }
+
+        files = block_files([result, SEARCH_RESULT])
+
+        assert [(f.id, f.source_call_id) for f in files] == [
+            ("f1", "srvtoolu_1")
+        ]
+        assert files[0].container_id is None

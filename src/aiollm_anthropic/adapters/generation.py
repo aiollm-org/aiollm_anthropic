@@ -17,7 +17,7 @@ from aiollm.adapters.validation import (
     merge_options,
     request_errors,
 )
-from aiollm.enums import ServerToolPhase, ToolChoice
+from aiollm.enums import Role, ServerToolPhase, ToolChoice
 from aiollm.exceptions import RequestValidationError
 from aiollm.types.requests.builtin import (
     BuiltinTool,
@@ -50,7 +50,9 @@ from aiollm_anthropic.adapters.conversions import (
     USAGE_CONVERSION,
     StreamState,
     block_citations,
+    block_files,
     message_citations,
+    message_files,
     message_native,
     message_server_calls,
     message_text,
@@ -228,8 +230,9 @@ class AnthropicGenerationAdapter(
 
         Returns:
             The generated text with its token counts, the calls of the
-            built-in tools Anthropic ran (``server_tool_calls``) and the
-            sources its text cites (``citations``); a message stopped
+            built-in tools Anthropic ran (``server_tool_calls``), the
+            sources its text cites (``citations``) and the files its code
+            made (``files``); a message stopped
             early, by ``max_tokens`` for example, keeps its text and gets
             ``incomplete_reason`` (``PAUSED`` for ``pause_turn``), and a
             refusal gets ``refusal``.
@@ -251,6 +254,7 @@ class AnthropicGenerationAdapter(
             tool_calls=message_tool_calls(raw),
             server_tool_calls=message_server_calls(raw),
             citations=message_citations(raw),
+            files=message_files(raw),
             native=message_native(raw),
             raw=raw,
         )
@@ -286,8 +290,8 @@ class AnthropicGenerationAdapter(
         block becomes a ``ServerToolCallEvent`` that starts the call and
         its result block one that ends it; ``message_stop`` becomes
         ``CompletedEvent`` with the counts and stop reason collected from
-        ``message_start`` and ``message_delta``, the built-in tool calls
-        and citations, and the content as ``native``; every other event
+        ``message_start`` and ``message_delta``, the built-in tool calls,
+        citations and files, and the content as ``native``; every other event
         (the pieces of a built-in tool's input, citations) is an
         ``OtherEvent``.
 
@@ -334,6 +338,7 @@ class AnthropicGenerationAdapter(
                         tool_calls=state.tool_calls(),
                         server_tool_calls=server_tool_calls(blocks),
                         citations=block_citations(blocks),
+                        files=block_files(blocks),
                         native=native,
                         raw=item,
                     )
@@ -366,7 +371,9 @@ class AnthropicGenerationAdapter(
         _check_arguments(request)
         fields = {
             "model": request.model,
-            "messages": self.input_conversion(request.input),
+            "messages": _with_uploads(
+                self.input_conversion(request.input), request
+            ),
             "max_tokens": (
                 self.default_max_tokens
                 if request.max_output_tokens is MISSING
@@ -516,6 +523,54 @@ TOOL_CHOICES: Final[Mapping[ToolChoice, str]] = {
     ToolChoice.REQUIRED: "any",
 }
 """Anthropic's ``tool_choice`` ``type`` of each shared mode."""
+
+
+def _with_uploads(
+    messages: list[dict[str, Any]], request: GenerationRequest
+) -> list[dict[str, Any]]:
+    """Put the files of a ``CodeExecution`` into the code's container.
+
+    Anthropic takes them as ``container_upload`` blocks of a ``user``
+    message: they go at the end of the last one.
+
+    Args:
+        messages: The converted conversation.
+        request: The shared request.
+
+    Returns:
+        The messages, the last ``user`` one with a ``container_upload``
+        block per file when the request's ``CodeExecution`` has files;
+        else the messages as they are.
+
+    Raises:
+        RequestValidationError: The request has files for the code but
+            no ``user`` message to carry them.
+    """
+    files = next(
+        (
+            tool.files
+            for tool in request.builtin_tools
+            if isinstance(tool, CodeExecution) and tool.files is not MISSING
+        ),
+        None,
+    )
+    if files is None:
+        return messages
+    uploads = [{"type": "container_upload", "file_id": f.id} for f in files]
+    for index in reversed(range(len(messages))):
+        message = messages[index]
+        if message["role"] != Role.USER.value:
+            continue
+        content = message["content"]
+        blocks = (
+            [{"type": "text", "text": content}]
+            if isinstance(content, str)
+            else list(content)
+        )
+        messages[index] = {**message, "content": [*blocks, *uploads]}
+        return messages
+    problem = "the files of code execution need a user message to go in"
+    raise RequestValidationError(problem, provider=PROVIDER, field="tools")
 
 
 def _tools(request: GenerationRequest) -> list[dict[str, Any]] | MISSING:

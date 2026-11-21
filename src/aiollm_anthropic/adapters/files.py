@@ -10,7 +10,12 @@ from typing import Final, Self
 from pydantic import MISSING
 
 from aiollm.adapters.base import BaseFilesAdapter
-from aiollm.adapters.validation import checked_options, request_errors
+from aiollm.adapters.validation import (
+    checked_options,
+    container_of,
+    request_errors,
+)
+from aiollm.exceptions import RequestValidationError
 from aiollm.types.requests.content import ProviderFile
 from aiollm.types.requests.generation import NoProviderOptions
 from aiollm.types.requests.upload import FileUpload
@@ -144,17 +149,33 @@ class AnthropicFilesAdapter(
         """
         return DeleteFile(file_id=file_id)
 
-    def to_download_method(self, file_id: str) -> DownloadFile:
+    def to_download_method(self, file: ProviderFile) -> DownloadFile:
         """Build the method that streams a file's content.
 
+        Anthropic keeps the files its code makes with the stored files,
+        so a ``ProducedFile`` of the Messages API downloads as any other.
+
         Args:
-            file_id: Anthropic's id of the file.
+            file: The file.
 
         Returns:
             ``DownloadFile``; Anthropic refuses a file it did not make
             (``downloadable`` false).
+
+        Raises:
+            RequestValidationError: The file names a container
+                (``ProducedFile.container_id``): Anthropic serves no
+                file from a container.
         """
-        return DownloadFile(file_id=file_id)
+        if container_of(file) is not None:
+            message = (
+                f"file {file.id} names a container, and Anthropic serves "
+                "no file from one"
+            )
+            raise RequestValidationError(
+                message, provider=self.provider, field="file"
+            )
+        return DownloadFile(file_id=file.id)
 
     def to_stored_file(self, raw: FileMetadata) -> StoredFile[FileMetadata]:
         """Convert Anthropic's file metadata into the shared metadata.

@@ -55,6 +55,7 @@ ANTHROPIC = FilesCase(
             "source": {"type": "file", "file_id": ANTHROPIC_FILE["id"]},
         },
     ],
+    container_download=None,
 )
 
 

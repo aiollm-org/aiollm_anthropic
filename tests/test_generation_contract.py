@@ -13,6 +13,9 @@ from typing import Any
 
 from aiollm.testing.contract.generation import (
     CALLS,
+    CODE_FILE_ID,
+    CODE_ID,
+    PRODUCED_ID,
     SCHEMA,
     SEARCH_ID,
     SEARCH_QUERIES,
@@ -208,6 +211,79 @@ def anthropic_searched_stream() -> list[dict[str, Any]]:
     ]
 
 
+CODE_CALL: dict[str, Any] = {
+    "type": "server_tool_use",
+    "id": CODE_ID,
+    "name": "bash_code_execution",
+    "input": {"command": "python chart.py"},
+}
+"""The block of the code execution the model makes."""
+
+CODE_RESULT: dict[str, Any] = {
+    "type": "bash_code_execution_tool_result",
+    "tool_use_id": CODE_ID,
+    "content": {
+        "type": "bash_code_execution_result",
+        "stdout": "",
+        "stderr": "",
+        "return_code": 0,
+        "content": [
+            {"type": "bash_code_execution_output", "file_id": PRODUCED_ID}
+        ],
+    },
+}
+"""The block of its result, with the file the code wrote."""
+
+CODE_TEXT: dict[str, Any] = {"type": "text", "text": "Here is the chart."}
+"""The text after the code execution."""
+
+
+def anthropic_coded_stream() -> list[dict[str, Any]]:
+    """An Anthropic stream of one code execution that made a file: the
+    call's input in one piece, the result whole, then the text."""
+    start, *_, stop = anthropic.STREAM
+    return [
+        start,
+        {
+            "type": "content_block_start",
+            "index": 0,
+            "content_block": CODE_CALL | {"input": {}},
+        },
+        {
+            "type": "content_block_delta",
+            "index": 0,
+            "delta": {
+                "type": "input_json_delta",
+                "partial_json": json.dumps(CODE_CALL["input"]),
+            },
+        },
+        {"type": "content_block_stop", "index": 0},
+        {
+            "type": "content_block_start",
+            "index": 1,
+            "content_block": CODE_RESULT,
+        },
+        {"type": "content_block_stop", "index": 1},
+        {
+            "type": "content_block_start",
+            "index": 2,
+            "content_block": {"type": "text", "text": "", "citations": None},
+        },
+        {
+            "type": "content_block_delta",
+            "index": 2,
+            "delta": {"type": "text_delta", "text": CODE_TEXT["text"]},
+        },
+        {"type": "content_block_stop", "index": 2},
+        {
+            "type": "message_delta",
+            "delta": {"stop_reason": "end_turn"},
+            "usage": {"output_tokens": 15},
+        },
+        stop,
+    ]
+
+
 ANTHROPIC_BUILTIN = BuiltinCase(
     tools={
         "tools": [
@@ -238,6 +314,23 @@ ANTHROPIC_BUILTIN = BuiltinCase(
     failed=anthropic_message(
         [SEARCH_CALL, SEARCH_FAILED, {"type": "text", "text": "No luck."}]
     ),
+    coded=anthropic_message([CODE_CALL, CODE_RESULT, CODE_TEXT]),
+    coded_stream=anthropic_coded_stream(),
+    produced={"source_call_id": CODE_ID},
+    code_files={
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "Hi"},
+                    {"type": "container_upload", "file_id": CODE_FILE_ID},
+                ],
+            }
+        ],
+        "tools": [
+            {"type": "code_execution_20250825", "name": "code_execution"}
+        ],
+    },
     paused=anthropic_message([SEARCH_CALL], "pause_turn"),
     continued=[{"role": "assistant", "content": [SEARCH_CALL]}],
 )

@@ -34,7 +34,11 @@ from aiollm.types.requests.generation import (
     ToolResult,
     Turn,
 )
-from aiollm.types.responses.builtin import Citation, ServerToolCall
+from aiollm.types.responses.builtin import (
+    Citation,
+    ProducedFile,
+    ServerToolCall,
+)
 from aiollm.types.responses.generation import TokenUsage
 
 from aiollm_anthropic.api import PROVIDER
@@ -553,6 +557,70 @@ def _citation(
             end_index=end,
         )
     return None
+
+
+OUTPUT_SUFFIX: Final = "_output"
+"""Ends the ``type`` of a block of a code result that names a file."""
+
+
+def block_files(blocks: Sequence[Mapping[str, Any]]) -> list[ProducedFile]:
+    """Collect the files the code executions of content blocks made.
+
+    A code execution's result (``bash_code_execution_tool_result``, and
+    the older ``code_execution_tool_result``) lists the files the code
+    wrote as ``bash_code_execution_output`` (``code_execution_output``)
+    blocks of its ``content``. Anthropic keeps them with the stored
+    files, so ``container_id`` is ``None``; their name is in their
+    metadata, not in the result.
+
+    Args:
+        blocks: The content blocks of a message, as Anthropic sent them.
+
+    Returns:
+        A file per output block, in order, with the call that made it.
+    """
+    return [
+        ProducedFile(
+            provider=PROVIDER,
+            id=output["file_id"],
+            source_call_id=block.get("tool_use_id"),
+        )
+        for block in blocks
+        if str(block.get("type", "")).endswith(RESULT_SUFFIX)
+        for output in _outputs(block)
+    ]
+
+
+def _outputs(block: Mapping[str, Any]) -> list[dict[str, Any]]:
+    """Take the blocks of a result that name a file the code wrote.
+
+    Args:
+        block: A built-in tool's result block.
+
+    Returns:
+        The ``..._output`` blocks with a ``file_id``, in order.
+    """
+    result = block.get("content")
+    outputs = result.get("content") if isinstance(result, dict) else None
+    return [
+        output
+        for output in (outputs if isinstance(outputs, list) else [])
+        if isinstance(output, dict)
+        and str(output.get("type", "")).endswith(OUTPUT_SUFFIX)
+        and isinstance(output.get("file_id"), str)
+    ]
+
+
+def message_files(message: Message) -> list[ProducedFile]:
+    """Collect the files the code executions of a message made.
+
+    Args:
+        message: A message.
+
+    Returns:
+        Its files, as ``block_files`` gives them; empty without.
+    """
+    return block_files(message_blocks(message))
 
 
 def message_server_calls(message: Message) -> list[ServerToolCall]:
