@@ -1,1 +1,0 @@
-A stream no longer raises `APIResponseError` when the input of a built-in tool (`server_tool_use`) arrives in `input_json_delta` pieces: the pieces are joined into the block's `input`, and the call is complete in `native`, `server_tool_calls` and its `ServerToolCallEvent`.
