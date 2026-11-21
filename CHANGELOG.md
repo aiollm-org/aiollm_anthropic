@@ -12,6 +12,26 @@ earlier changes are in [aiollm's changelog](https://github.com/aiollm-org/aiollm
 
 <!-- towncrier release notes start -->
 
+## [0.17.0] - 2026-11-21
+
+### Added
+
+- Files of code execution: `response.files` (and `CompletedEvent.files`) lists
+  the files Anthropic's code execution wrote, from the
+  `bash_code_execution_output` (and `code_execution_output`) blocks of its
+  results, as `ProducedFile`s with the `source_call_id` of the call; they are
+  stored files, so `client.files.download(file)` and every other files call
+  take them. `CodeExecution(files=[...])` puts stored files into the code's
+  container as `container_upload` blocks at the end of the last `user` message.
+
+### Changed
+
+- **Breaking:** needs `aiollm-core` 0.17:
+  `AnthropicFilesAdapter.to_download_method` takes the whole `ProviderFile`, as
+  the core's `IFilesAdapter` now does, and refuses a file that names a
+  container (`ProducedFile.container_id`) with `RequestValidationError`, since
+  Anthropic serves no file from one.
+
 ## [0.16.0] - 2026-11-21
 
 ### Added
@@ -61,6 +81,7 @@ earlier changes are in [aiollm's changelog](https://github.com/aiollm-org/aiollm
   (it was `aiollm`), from PyPI: `aiollm-core>=0.15,<0.16`. The module is
   still `aiollm`.
 
-[Unreleased]: https://github.com/aiollm-org/aiollm_anthropic/compare/v0.16.0...HEAD
+[Unreleased]: https://github.com/aiollm-org/aiollm_anthropic/compare/v0.17.0...HEAD
+[0.17.0]: https://github.com/aiollm-org/aiollm_anthropic/compare/v0.16.0...v0.17.0
 [0.16.0]: https://github.com/aiollm-org/aiollm_anthropic/compare/v0.15.0...v0.16.0
 [0.15.0]: https://github.com/aiollm-org/aiollm_anthropic/releases/tag/v0.15.0
