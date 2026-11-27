@@ -90,7 +90,7 @@ dev = [
 # (tests/contracts/update.py): Anthropic publishes no OpenAPI file. A new
 # version changes the snapshot, the generated types and this pin together.
 upstream = [
-    "anthropic==2.12.0",
+    "anthropic==2.13.0",
 ]
 test = [
     "aiollm-core[testing]>=0.17,<0.18",
